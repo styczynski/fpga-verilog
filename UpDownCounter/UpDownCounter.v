@@ -14,31 +14,45 @@
  */
 module UpDownCounter
 #(
-    parameter INPUT_BIT_WIDTH = 8
+    parameter INPUT_BIT_WIDTH = 8,
+    parameter MAX_VALUE = 2**INPUT_BIT_WIDTH-1,
+    parameter MIN_VALUE = 0
 )
 (
     input Clk,
     input Reset,
     input UpDownMode,
-    output reg [INPUT_BIT_WIDTH-1:0] Output
+    output reg [INPUT_BIT_WIDTH-1:0] Output,
+    output reg LimitReachedFlag
 );
 
     always @(posedge Clk or posedge Reset)
     begin
         if(Reset)
             begin
-                Output <= {INPUT_BIT_WIDTH{1'b0}};
+                Output <= MIN_VALUE;
+                LimitReachedFlag <= 0;
             end
         else if(UpDownMode == 1)
             begin
-                if(Output < 2**INPUT_BIT_WIDTH-1)
-                begin
-                    Output <= Output + 1;
-                end
+                if(Output < MAX_VALUE)
+                    begin
+                        LimitReachedFlag <= 0;
+                        Output <= Output + 1;
+                    end
+                else
+                    begin
+                        LimitReachedFlag <= 1;
+                    end
             end
-        else if(Output > 0)
+        else if(Output > MIN_VALUE)
             begin
+                LimitReachedFlag <= 0;
                 Output <= Output - 1;
+            end
+        else
+            begin
+                LimitReachedFlag <= 1;
             end
     end
 

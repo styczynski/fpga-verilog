@@ -47,6 +47,7 @@ module TestUpDownCounter
     
 	// Outputs
     wire [INPUT_BIT_WIDTH-1:0] Output;
+    wire LimitReachedFlag;
 
 	// Instantiate the Unit Under Test (UUT)
 	UpDownCounter #(
@@ -55,7 +56,8 @@ module TestUpDownCounter
 		.Clk(Clk),
         .Reset(Reset),
         .UpDownMode(UpDownMode),
-        .Output(Output)
+        .Output(Output),
+        .LimitReachedFlag(LimitReachedFlag)
 	);
     
     integer i;
