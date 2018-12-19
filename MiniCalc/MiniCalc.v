@@ -106,20 +106,20 @@ module MiniCalc
             CODE_INSTR_DIV:
                 begin
                     OutputSelect <= 2'b00;
-                    InternalAOutput <= 'x;
-                    InternalBOutput <= 'x;
+                    //InternalAOutput <= {INPUT_BIT_WIDTH-1{x}};
+                    //InternalBOutput <= {INPUT_BIT_WIDTH-1{x}};
                 end
             CODE_INSTR_ADD_SUB:
                 begin
                     OutputSelect <= 2'b01;
-                    InternalAOutput <= 'x;
-                    InternalBOutput <= 'x;
+                    //InternalAOutput <= {INPUT_BIT_WIDTH-1{x}};
+                    //InternalBOutput <= {INPUT_BIT_WIDTH-1{x}};
                 end
             CODE_INSTR_MIN_MAX:
                 begin
                     OutputSelect <= 2'b10;
-                    InternalAOutput <= 'x;
-                    InternalBOutput <= 'x;
+                    //InternalAOutput <= {INPUT_BIT_WIDTH-1{x}};
+                    //InternalBOutput <= {INPUT_BIT_WIDTH-1{x}};
                 end
             CODE_INSTR_MUL:
                 begin

@@ -41,4 +41,9 @@
 `include "MinMax/MinMax.v"
 `include "MinMax/TestMinMax.v"
 
+`include "MiniCalc2/MiniCalc2.v"
+`include "MiniCalc2/MiniCalc2Impl.v"
+
+`include "Uart/UartRx.v"
+
 `endif
