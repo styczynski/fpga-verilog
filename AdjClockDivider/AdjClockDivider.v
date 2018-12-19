@@ -17,23 +17,30 @@ module AdjClockDivider
 	parameter INPUT_BIT_WIDTH = 8
 )
 (
-    input ClkInput,
+    input Clk,
+    input ClkEnable,
     input [(INPUT_BIT_WIDTH-1):0] FrequencyDividerFactor,
-    output wire ClkOutput
+    output reg ClkOutput,
+	 output reg ClkEnableOutput
 );
 
     reg [(INPUT_BIT_WIDTH-1):0] InternalCounter;
 
-    always @(posedge ClkInput)
+    initial InternalCounter = 0;
+
+    always @(posedge Clk)
     begin
-    
-       InternalCounter <= InternalCounter + 1;
-       if(InternalCounter == FrequencyDividerFactor)
-       begin
-          InternalCounter <= 0;
-          ClkOutput <= !ClkOutput;
-       end
-    
+	    ClkEnableOutput <= 0;
+	    if(ClkEnable)
+			 begin
+				 InternalCounter <= InternalCounter + 1;
+				 if(InternalCounter >= FrequencyDividerFactor - 1)
+				 begin
+					 InternalCounter <= 0;
+					 ClkOutput <= !ClkOutput;
+					 ClkEnableOutput <= 1;
+				 end
+			 end
     end
     
 endmodule

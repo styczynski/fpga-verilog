@@ -10,7 +10,8 @@
 #                                            UCF for Mimas                                                                                         #
 #**************************************************************************************************************************************************#
 
-NET "Clk" LOC = P126 | IOSTANDARD = LVCMOS33 | Period = 100 MHz;
+NET "Clk" LOC = P126;
+TIMESPEC TS_CLK = PERIOD "Clk" 100 MHz HIGH 50%;
 
 ###################################################################################################################################################
 #                                                 LEDs                                                                                            #
@@ -28,6 +29,7 @@ NET "LED[7]" 			  LOC = P111	| IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST |
 #                                                Push Button Switches                                                                             #
 ################################################################################################################################################### 
 
+
 NET "Btn[0]" 			  LOC = P124	| IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST | PULLUP;
 NET "Btn[1]" 			  LOC = P123	| IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST | PULLUP;
 NET "Btn[2]" 			  LOC = P121	| IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST | PULLUP;
@@ -40,7 +42,7 @@ NET "Switch[3]"                   LOC = P32      | IOSTANDARD = LVCMOS33 | DRIVE
 NET "Switch[4]"                   LOC = P30      | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;    # IO_L36P_3          	        Sch = GPIO-P16 
 NET "Switch[5]"                   LOC = P29      | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;    # IO_L36N_3          		    Sch = GPIO-N16 
 NET "Switch[6]"                   LOC = P27      | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;    # IO_L37P_3	   		            Sch = GPIO-P15 
-NET "Switch[7]"                   LOC = P26      | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;    # IO_L37N_3          		    Sch = GPIO-N15 
+NET "Switch[7]"                   LOC = P26      | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;    # IO_L37N_3        
 
 ###################################################################################################################################################
 #                                                   HEADER P1                                                                                     #

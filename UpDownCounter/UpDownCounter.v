@@ -20,20 +20,28 @@ module UpDownCounter
 )
 (
     input Clk,
+	 input ClkEnable,
     input Reset,
     input UpDownMode,
+	 input Stop,
     output reg [INPUT_BIT_WIDTH-1:0] Output,
     output reg LimitReachedFlag
 );
 
-    always @(posedge Clk or posedge Reset)
+    initial Output = MIN_VALUE;
+
+    always @(posedge Clk)
     begin
-        if(Reset)
+	     if(Reset)
             begin
                 Output <= MIN_VALUE;
                 LimitReachedFlag <= 0;
             end
-        else if(UpDownMode == 1)
+        else if(Stop || !ClkEnable)
+		     begin
+			      // Do nothing
+			  end
+	     else if(UpDownMode)
             begin
                 if(Output < MAX_VALUE)
                     begin
