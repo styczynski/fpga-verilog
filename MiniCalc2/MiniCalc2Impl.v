@@ -22,7 +22,7 @@ module MiniCalc2Impl
 	     .Clk(Clk),
 		  .Input(!Btn[0]),
 		  .Output(BtnDebounced[0])
-	 );
+	 ); 
 	 
 	 debounce debounce1(
 	     .Clk(Clk),

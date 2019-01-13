@@ -10,6 +10,7 @@
 `include "../Uart/UartRx.v"
 `include "../Uart/UartTx.v"
 `include "../Uart/UART.v"
+`include "./MiniCalc2Core.v"
 
 /*
  * Piotr Styczyński @styczynski
@@ -21,6 +22,16 @@
  * MIT License
  */
 module MiniCalc2
+#(
+    parameter UART_BUFFER_ADDR_BIT_WIDTH = 3,
+    parameter STATE_BIT_WIDTH = 4,
+    parameter STATE_IDLE = 4'b0000,
+    parameter STATE_UART_COLLECT = 4'b0001,
+    parameter STATE_EXECUTE = 4'b0011,
+    parameter STATE_EXECUTE_WAIT = 4'b0100,
+    parameter UART_COMMAND_TERMINATOR = 8'b00000000,
+    parameter INPUT_BIT_WIDTH = 8
+)
 (
     input Clk,
 	 input ClkSel,
@@ -30,8 +41,8 @@ module MiniCalc2
     input Up,
     input Down,
     input [4:0] Speed,
-    output reg ModeOutput0,
-	 output reg ModeOutput1,
+    output wire ModeOutput0,
+	 output wire ModeOutput1,
 	 output reg ClkOutput,
 	 output wire ModeOutput2,
     output wire [0:6] LEDDisp3,
@@ -42,11 +53,6 @@ module MiniCalc2
 	 output wire UartTxWire
 );
 
-    wire ClkSrc;
-    BUFGMUX clkSrc(.I0(Clk), .I1(Clk2), .S(ClkSel), .O(ClkSrc));
-    //assign ClkSrc = Clk;
-
-    wire [0:15] CounterOutput;
 	 reg [15:0] CounterValue;
     
     wire [3:0] CounterBCDDigit3;
@@ -62,96 +68,34 @@ module MiniCalc2
 	 reg UartInputEnable;
 	 wire UartInputReady;
 	 
+	 reg [0:7] CoreInstruction;
+     reg [0:INPUT_BIT_WIDTH-1] CoreInput;
+     wire [0:INPUT_BIT_WIDTH-1] CoreOutput;
+     wire [0:INPUT_BIT_WIDTH-1] CoreStackTop;
+	 reg CoreExecute;
+     wire CoreReady;
+     reg CoreNext;
+     wire CoreHasNext;
+     wire CoreStackEmpty;
+	 
+    reg [0:32] UartTimeoutCounter;
+     
     UART #(
         .FREQ(100_000_000),
-        .BAUD(115200)
+        .BAUD(57600)
     ) uartModule (
-	     .clk(Clk),
-		  .reset(1),
+	    .clk(Clk),
+		.reset(1),
         .rx_i(UartRxWire),
-		  .rx_data_o(UartInputData),
-		  .rx_ack_i(UartInputEnable),
-		  .rx_ready_o(UartInputReady),
+		.rx_data_o(UartInputData),
+		.rx_ack_i(UartInputEnable),
+		.rx_ready_o(UartInputReady),
         .tx_o(UartTxWire),
         .tx_data_i(UartOutputData),
         .tx_ready_i(UartOutputEnable),
         .tx_ack_o(UartOutputIdle)
     );
-    
-    /*wire UartReady;
-	wire [7:0] UartData;
 
-    reg UartTxDV;
-    reg [7:0] UartTxData;
-    wire UartTxBusy;
-	 wire UartReceived;
-	 
-    UartTx uartTx (
-       .clk(Clk),
-		 .rst(0),
-       .rx(UartRxWire),
-		 .tx(UartTxWire),
-		 .transmit(UartTxDV),
-       .tx_byte(UartTxData), 
-		 .rx_byte(UartData),
-       .is_transmitting(UartTxBusy),
-		 .received(UartReceived)
-    );*/
-	 
-	 /*
-	 input clk, // The master clock for this module
-    input rst, // Synchronous reset.
-    input rx, // Incoming serial line
-    output tx, // Outgoing serial line
-    input transmit, // Signal to transmit
-    input [7:0] tx_byte, // Byte to transmit
-    output received, // Indicated that a byte has been received.
-    output [7:0] rx_byte, // Byte received
-    output is_receiving, // Low when receive line is idle.
-    output is_transmitting, // Low when transmit line is idle.
-    output recv_error // Indicates error in receiving packet.
-	 */
-    
-    /*UartRx #(
-	    .CLKS_PER_BIT(87)
-    ) uartRx
-    (
-	    .i_Clock(Clk),
-       .i_Rx_Serial(UartRxWire),
-       .o_Rx_DV(UartReady),
-       .o_Rx_Byte(UartData)
-     );*/
-    
-    reg UpDownMode;
-    reg StopMode;
-    
-    wire CounterTriggerClk;
-    wire [31:0] FrequencyDividerFactor;
-    
-	 assign FrequencyDividerFactor = 31'b1 << Speed;
-	 
-    AdjClockDivider #(
-        .INPUT_BIT_WIDTH(32)
-    ) clockDivider (
-        .Clk(Clk),
-		  .ClkEnable(ClkSrc),
-        .FrequencyDividerFactor(FrequencyDividerFactor),
-        .ClkEnableOutput(CounterTriggerClk)
-    );
-    
-    UpDownCounter #(
-        .INPUT_BIT_WIDTH(16),
-        .MAX_VALUE(9999)
-    ) upDownCounter (
-	     .Stop(StopMode),
-		  .Clk(Clk),
-		  .ClkEnable(CounterTriggerClk),
-        .Reset(Reset),
-        .UpDownMode(UpDownMode),
-        .Output(CounterOutput),
-        .LimitReachedFlag(ModeOutput2)
-	);
-    
     Bin2BCDConverter_4 #(
         .INPUT_BIT_WIDTH(16)
     ) bin2BCDConverter (
@@ -182,40 +126,104 @@ module MiniCalc2
         .Segments(LEDDisp0)
     );
     
+	MiniCalc2Core #(
+        .INPUT_BIT_WIDTH(INPUT_BIT_WIDTH)
+    ) core (
+		.Clk(Clk),
+		.Instruction(CoreInstruction),
+        .InputA(CoreInput),
+        .OutputA(CoreOutput),
+		.Execute(CoreExecute),
+        .Ready(CoreReady),
+        .HasNext(CoreHasNext),
+        .Next(CoreNext),
+        .StackTop(CoreStackTop),
+        .StackEmpty(CoreStackEmpty)
+	);
+    
+    reg [7:0] UartInputBuffer [0:(1<<UART_BUFFER_ADDR_BIT_WIDTH)-1];
+    reg [0:UART_BUFFER_ADDR_BIT_WIDTH-1] UartInputBufferPointer;
+    
+    reg [0:STATE_BIT_WIDTH-1] State = STATE_IDLE;
+	 
+    assign { ModeOutput0, ModeOutput1 } = State;
+    assign ModeOutput2 = ( UartInputReady );
+     
     always @(posedge Clk)
     begin
-		UartOutputEnable <= 1;
-        UartInputEnable <= 1;
-        UartOutputData <= CounterOutput;
-	
-        if(UartInputReady)
+        CounterValue <= CoreStackTop;
+        if(State == STATE_EXECUTE_WAIT)
             begin
-                CounterValue <= UartInputData;
+                CoreNext <= 0;
+                CoreExecute <= 1;
+                State <= STATE_EXECUTE;
             end
-                
-        
-        if(Stop)
+        else if(State == STATE_EXECUTE)
             begin
-                StopMode <= 1;
-					 ModeOutput0 <= 0;
-					 ModeOutput1 <= 0;
+                if(CoreHasNext)
+                    begin
+                        if(UartOutputIdle)
+                            begin
+                                State <= STATE_EXECUTE_WAIT;
+                                CoreExecute <= 1;
+                                UartOutputData <= CoreOutput;
+                                CoreNext <= 1;
+                                UartOutputEnable <= 1;
+                                UartInputEnable <= 0;
+                            end
+                         else
+                            begin
+                                CoreExecute <= 1;
+                                CoreNext <= 0;
+                                UartOutputEnable <= 1;
+                                UartInputEnable <= 0;
+                            end
+                    end
+                else if(CoreReady)
+                    begin
+                        State <= STATE_IDLE;
+                        UartInputEnable <= 1;
+                        UartOutputEnable <= 0;
+                        CoreExecute <= 0;
+                        CoreNext <= 0;
+                    end
+                else
+                    begin
+                        UartOutputEnable <= 0;
+                        UartInputEnable <= 0;
+                        CoreExecute <= 1;
+                        CoreNext <= 0;
+                    end
             end
-        else if(Up)
+        else
             begin
-				    StopMode <= 0;
-					 UpDownMode <= 1;
-					 ModeOutput0 <= 1;
-					 ModeOutput1 <= 0;
-            end
-        else if(Down)
-            begin
-				    StopMode <= 0;
-                UpDownMode <= 0;
-					 ModeOutput0 <= 0;
-					 ModeOutput1 <= 1;
+                UartInputEnable <= 1;
+                UartOutputEnable <= 0;
+                if(UartInputReady && UartInputData != UART_COMMAND_TERMINATOR && (State == STATE_IDLE || State == STATE_UART_COLLECT))
+                    begin
+                        State <= STATE_UART_COLLECT;
+                        UartInputBuffer[UartInputBufferPointer] <= UartInputData;
+                        UartInputBufferPointer <= UartInputBufferPointer + 1;
+                        CoreNext <= 0;
+                        CoreExecute <= 0;
+                    end
+                else if(UartInputReady && UartInputData == UART_COMMAND_TERMINATOR && State == STATE_UART_COLLECT)
+                    begin
+                        // We have collected UART data then we should send it to core for execution
+                        CoreInstruction <= UartInputBuffer[0];
+                        CoreInput <= UartInputBuffer[1];
+                        CoreExecute <= 1;
+                        CoreNext <= 0;
+                        State <= STATE_EXECUTE;
+                        UartInputBufferPointer <= 0;
+                    end
+                else
+                    begin
+                        CoreExecute <= 0;
+                    end
             end
     end
-    
+	 
 endmodule
 
 
