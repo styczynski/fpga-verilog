@@ -154,7 +154,7 @@ module MiniCalc2Core
                         end
                     CODE_INSTR_PUSH:
                         begin
-                            if(StackSize >= (1<<STACK_ADDR_SIZE) - 1)
+                            if(StackSize >= (1<<STACK_ADDR_SIZE) - 2)
                                 begin
                                     ErrorStackUnderflow <= 0;
                                     ErrorInvalidArg <= 0;
