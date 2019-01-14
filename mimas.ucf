@@ -10,7 +10,7 @@
 #                                            UCF for Mimas                                                                                         #
 #**************************************************************************************************************************************************#
 
-NET "Clk" LOC = P126 | CLOCK_DEDICATED_ROUTE = TRUE | IOSTANDARD = LVCMOS33 | Period = 100 MHz;
+NET "Clk" LOC = P126 | IOSTANDARD = LVCMOS33 | Period = 100 MHz;
 
 ###################################################################################################################################################
 #                                                 LEDs                                                                                            #
@@ -20,10 +20,10 @@ NET "LED[0]" 			  LOC = P119	| IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST |
 NET "LED[1]" 			  LOC = P118	| IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST | PULLUP;
 NET "LED[2]" 			  LOC = P117	| IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST | PULLUP;
 NET "LED[3]" 			  LOC = P116	| IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST | PULLUP;
-#NET "LED[4]" 			  LOC = P115	| IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST | PULLUP;
-#NET "LED[5]" 			  LOC = P114	| IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST | PULLUP;
-#NET "LED[6]" 			  LOC = P112	| IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST | PULLUP;
-#NET "LED[7]" 			  LOC = P111	| IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST | PULLUP;
+NET "LED[4]" 			  LOC = P115	| IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST | PULLUP;
+NET "LED[5]" 			  LOC = P114	| IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST | PULLUP;
+NET "LED[6]" 			  LOC = P112	| IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST | PULLUP;
+NET "LED[7]" 			  LOC = P111	| IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST | PULLUP;
 ###################################################################################################################################################
 #                                                Push Button Switches                                                                             #
 ################################################################################################################################################### 
@@ -39,8 +39,8 @@ NET "Switch[2]"                   LOC = P33      | IOSTANDARD = LVCMOS33 | DRIVE
 NET "Switch[3]"                   LOC = P32      | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;    # IO_L2N_3           		    Sch = GPIO-N17 
 NET "Switch[4]"                   LOC = P30      | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;    # IO_L36P_3          	        Sch = GPIO-P16 
 NET "Switch[5]"                   LOC = P29      | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;    # IO_L36N_3          		    Sch = GPIO-N16 
-NET "Switch[6]"                   CLOCK_DEDICATED_ROUTE = TRUE | LOC = P27      | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST;    # IO_L37P_3	   		            Sch = GPIO-P15 
-#NET "Switch[7]"                   LOC = P26      | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;    # IO_L37N_3          		    Sch = GPIO-N15 
+NET "Switch[6]"                   LOC = P27      | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;    # IO_L37P_3	   		            Sch = GPIO-P15 
+NET "Switch[7]"                   LOC = P26      | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;    # IO_L37N_3          		    Sch = GPIO-N15 
 
 ###################################################################################################################################################
 #                                                   HEADER P1                                                                                     #
