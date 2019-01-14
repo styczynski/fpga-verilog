@@ -1,4 +1,5 @@
 `include "../../components/Debouncer/Debouncer.v"
+`include "../../components/Synchronizer/Synchronizer.v"
 `include "MiniCalc2.v"
 
 module MiniCalc2Impl
@@ -18,9 +19,9 @@ module MiniCalc2Impl
     wire [3:0] BtnDebounced;
     wire [7:0] SwitchSync;
      
-    Genvar gi;
+    genvar gi;
     generate
-        for (gi=0; gi<=7; gi=gi+1) begin : gensynch
+        for (gi=0; gi<=7; gi=gi+1) begin : genSynchronizer
             Synchronizer (
                 .Clk(Clk),
                 .Input(Switch[gi]),
@@ -30,7 +31,7 @@ module MiniCalc2Impl
     endgenerate
     
     generate
-        for (gi=0; gi<=3; gi=gi+1) begin : gensynch
+        for (gi=0; gi<=3; gi=gi+1) begin : genDebouncer
             Debouncer debounce0(
                 .Clk(Clk),
                 .Input(!Btn[gi]),
