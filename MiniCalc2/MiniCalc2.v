@@ -3,12 +3,8 @@
 `define LIB_STYCZYNSKI_MINI_CALC_2_V
 
 `include "../UpDownCounter/UpDownCounter.v"
-`include "../Pow2/Pow2_32.v"
 `include "../Bin2BCDConverter/Bin2BCDConverter_4.v"
 `include "../SegmentLedHexDecoder/SegmentLedHexDecoder.v"
-`include "../AdjClockDivider/AdjClockDivider.v"
-`include "../Uart/UartRx.v"
-`include "../Uart/UartTx.v"
 `include "../Uart/UART.v"
 `include "./MiniCalc2Core.v"
 
