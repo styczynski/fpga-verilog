@@ -1,4 +1,0 @@
-#!/bin/node
-
-const client = require('../client.js');
-client.call('pop');

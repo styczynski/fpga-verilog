@@ -1,9 +1,0 @@
-#!/bin/node
-
-const client = require('../client.js');
-let arr = [];
-for(let i=0;i<250;++i) {
-    arr.push({ call: 'push', number: i+1 });
-}
-
-client.call(arr);
