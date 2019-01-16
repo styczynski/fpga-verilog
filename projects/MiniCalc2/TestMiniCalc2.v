@@ -147,9 +147,9 @@ module TestMiniCalc
     );
     
     integer k;
-    `startTest("TestMiniCalc")
+    `startTest("MiniCalc")
+    
         // Initialize Inputs
-        
         Clk = 0;
         Btn = 0;
         Switch = 0;

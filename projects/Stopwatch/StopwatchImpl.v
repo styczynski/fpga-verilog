@@ -16,31 +16,31 @@ module StopwatchImpl
     wire [3:0] BtnDebounced;
     wire BtnExtDebounced;
      
-    debounce debounce0(
+    Debouncer debounce0(
         .Clk(Clk),
         .Input(!Btn[0]),
         .Output(BtnDebounced[0])
     );
      
-    debounce debounce1(
+    Debouncer debounce1(
         .Clk(Clk),
         .Input(!Btn[1]),
         .Output(BtnDebounced[1])
     );
      
-    debounce debounce2(
+    Debouncer debounce2(
         .Clk(Clk),
         .Input(!Btn[2]),
         .Output(BtnDebounced[2])
     );
      
-    debounce debounce3(
+    Debouncer debounce3(
         .Clk(Clk),
         .Input(!Btn[3]),
         .Output(BtnDebounced[3])
     );
      
-    debounce debounceExtBtn(
+    Debouncer debounceExtBtn(
         .Clk(Clk),
         .Input(Switch[6]),
         .Output(BtnExtDebounced)
