@@ -28,10 +28,6 @@
 
 `include "RegMux/RegMux.v"
 
-`include "MiniCalc/MiniCalc.v"
-`include "MiniCalc/MiniCalcImpl.v"
-`include "MiniCalc/TestMiniCalc.v"
-
 `include "UnsignDividerComb/UnsignDividerComb.v"
 `include "UnsignDividerComb/TestUnsignDividerComb.v"
 
@@ -41,9 +37,6 @@
 `include "MinMax/MinMax.v"
 `include "MinMax/TestMinMax.v"
 
-`include "MiniCalc2/MiniCalc2.v"
-`include "MiniCalc2/MiniCalc2Impl.v"
-
-`include "Uart/UartRx.v"
+`include "Uart/Uart.v"
 
 `endif

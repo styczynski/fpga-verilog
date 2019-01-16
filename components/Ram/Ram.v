@@ -23,7 +23,7 @@ module RAM #(
 );
 
     reg [DATA_WIDTH-1:0] Memory [0:(1<<ADDR_WIDTH)-1]; 
-
+    
     always @(posedge Clk)
     begin
         if(Write)

@@ -2,11 +2,11 @@
 `ifndef LIB_STYCZYNSKI_STOPWATCH_V
 `define LIB_STYCZYNSKI_STOPWATCH_V
 
-`include "../UpDownCounter/UpDownCounter.v"
-`include "../Pow2/Pow2_32.v"
-`include "../Bin2BCDConverter/Bin2BCDConverter_4.v"
-`include "../SegmentLedHexDecoder/SegmentLedHexDecoder.v"
-`include "../AdjClockDivider/AdjClockDivider.v"
+`include "../../components/UpDownCounter/UpDownCounter.v"
+`include "../../components/Pow2/Pow2_32.v"
+`include "../../components/Bin2BCDConverter/Bin2BCDConverter_4.v"
+`include "../../components/SegmentLedHexDecoder/SegmentLedHexDecoder.v"
+`include "../../components/AdjClockDivider/AdjClockDivider.v"
 
 /*
  * Piotr Styczyński @styczynski

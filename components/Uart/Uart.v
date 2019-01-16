@@ -29,9 +29,9 @@ module ClockDiv #(
     localparam INIT = FREQ_I / FREQ_O / 2 - 1;
     localparam ACTUAL_FREQ_O = FREQ_I / ((INIT + 1) * 2);
     localparam PPM = 64'd1_000_000 * (ACTUAL_FREQ_O - FREQ_O) / FREQ_O;
-    initial $display({"ClockDiv #(.FREQ_I(%d), .FREQ_O(%d),\n",
+    /*initial $display({"ClockDiv #(.FREQ_I(%d), .FREQ_O(%d),\n",
                       "           .INIT(%d), .ACTUAL_FREQ_O(%d), .PPM(%d))"},
-                     FREQ_I, FREQ_O, INIT, ACTUAL_FREQ_O, PPM);
+                     FREQ_I, FREQ_O, INIT, ACTUAL_FREQ_O, PPM);*/
     generate
         if(INIT < 0)
             _ERROR_FREQ_TOO_HIGH_ error();

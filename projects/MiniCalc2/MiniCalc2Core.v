@@ -2,7 +2,7 @@
 `ifndef LIB_STYCZYNSKI_MINI_CALC_2_CORE_V
 `define LIB_STYCZYNSKI_MINI_CALC_2_CORE_V
 
-`include "../Ram/Ram.v"
+`include "../../components/Ram/Ram.v"
 
 /*
  * Piotr Styczyński @styczynski
@@ -59,12 +59,13 @@ module MiniCalc2Core
     
     reg [0:STATE_BIT_WIDTH-1] State = STATE_IDLE;
     
+    reg WaitFlag;
     reg RamWrite;
     reg [0:STACK_ADDR_SIZE-1] RamAddr;
     reg [INPUT_BIT_WIDTH-1:0] RamInput;
     wire [INPUT_BIT_WIDTH-1:0] RamOutput;
     
-    assign Ready = &STATE_IDLE;
+    assign Ready = ( State == STATE_IDLE && !WaitFlag );
     assign StackEmpty = (StackSize == 0);
     assign OperationalError = ( ErrorStackUnderflow | ErrorInvalidArg | ErrorInvalidInstr | ErrorOverflow );
     
@@ -84,7 +85,12 @@ module MiniCalc2Core
     always @(posedge Clk)
     begin
         RamWrite <= 0;
-        if(State == STATE_FETCH_SEC)
+        if(WaitFlag)
+            begin
+                WaitFlag <= 0;
+                RamWrite <= 0;
+            end
+        else if(State == STATE_FETCH_SEC)
             begin
                 State <= STATE_IDLE;
                 StackSecond <= RamOutput;
@@ -154,7 +160,7 @@ module MiniCalc2Core
                         end
                     CODE_INSTR_PUSH:
                         begin
-                            if(StackSize >= (1<<STACK_ADDR_SIZE) - 2)
+                            if(StackSize >= (1<<STACK_ADDR_SIZE) - 1)
                                 begin
                                     ErrorStackUnderflow <= 0;
                                     ErrorInvalidArg <= 0;
@@ -169,6 +175,7 @@ module MiniCalc2Core
                                     ErrorInvalidInstr <= 0;
                                     ErrorOverflow <= 0;
                                     State <= STATE_IDLE;
+                                    WaitFlag <= 1;
                                     StackFirst <= InputA;
                                     StackSecond <= StackFirst;
                                     OutputA <= InputA;
@@ -183,7 +190,6 @@ module MiniCalc2Core
                         end
                     CODE_INSTR_POP:
                         begin
-                            State <= STATE_IDLE;
                             if(StackSize == 0)
                                 begin
                                     ErrorStackUnderflow <= 1;
@@ -194,6 +200,7 @@ module MiniCalc2Core
                                     StackFirst <= 0;
                                     StackSecond <= 0;
                                     OutputA <= 0;
+                                    State <= STATE_IDLE;
                                 end
                             else if(StackSize == 1)
                                 begin
@@ -205,6 +212,7 @@ module MiniCalc2Core
                                     StackFirst <= 0;
                                     StackSecond <= 0;
                                     OutputA <= 0;
+                                    State <= STATE_IDLE;
                                 end
                             else if(StackSize == 2)
                                 begin
@@ -216,6 +224,7 @@ module MiniCalc2Core
                                     StackFirst <= StackSecond;
                                     StackSecond <= 0;
                                     OutputA <= StackSecond;
+                                    State <= STATE_IDLE;
                                 end
                            else
                                 begin
@@ -224,6 +233,7 @@ module MiniCalc2Core
                                     ErrorInvalidInstr <= 0;
                                     ErrorOverflow <= 0;
                                     State <= STATE_FETCH_SEC;
+                                    WaitFlag <= 1;
                                     StackSize <= StackSize - 1;
                                     StackFirst <= StackSecond;
                                     OutputA <= StackSecond;
@@ -241,6 +251,7 @@ module MiniCalc2Core
                                     ErrorInvalidInstr <= 0;
                                     ErrorOverflow <= 0;
                                     State <= STATE_IDLE;
+                                    WaitFlag <= 1;
                                     StackSecond <= StackFirst;
                                     OutputA <= StackFirst;
                                     if(StackSize >= 2)
@@ -261,7 +272,7 @@ module MiniCalc2Core
                         end
                     CODE_INSTR_SWAP:
                         begin
-                            if(StackSize > 0)
+                            if(StackSize > 1)
                                 begin
                                     ErrorStackUnderflow <= 0;
                                     ErrorInvalidArg <= 0;
@@ -300,6 +311,7 @@ module MiniCalc2Core
                             else
                                 begin
                                     State <= STATE_FETCH_OUT;
+                                    WaitFlag <= 1;
                                     RamWrite <= 0;
                                     RamAddr <= InputA;
                                     OutputA <= 0;
@@ -331,6 +343,7 @@ module MiniCalc2Core
                                             if(StackSize >= 3)
                                                 begin
                                                     State <= STATE_FETCH_SEC;
+                                                    WaitFlag <= 1;
                                                     RamWrite <= 0;
                                                     RamAddr <= StackSize-3;
                                                 end
@@ -364,6 +377,7 @@ module MiniCalc2Core
                                                     if(StackSize >= 3)
                                                         begin
                                                             State <= STATE_FETCH_SEC;
+                                                            WaitFlag <= 1;
                                                             RamWrite <= 0;
                                                             RamAddr <= StackSize-3;
                                                         end
@@ -388,6 +402,7 @@ module MiniCalc2Core
                                             if(StackSize >= 3)
                                                 begin
                                                     State <= STATE_FETCH_SEC;
+                                                    WaitFlag <= 1;
                                                     RamWrite <= 0;
                                                     RamAddr <= StackSize-3;
                                                 end
@@ -421,6 +436,7 @@ module MiniCalc2Core
                                                     if(StackSize >= 3)
                                                         begin
                                                             State <= STATE_FETCH_SEC;
+                                                            WaitFlag <= 1;
                                                             RamWrite <= 0;
                                                             RamAddr <= StackSize-3;
                                                         end
@@ -455,6 +471,7 @@ module MiniCalc2Core
                                                     if(StackSize >= 3)
                                                         begin
                                                             State <= STATE_FETCH_SEC;
+                                                            WaitFlag <= 1;
                                                             RamWrite <= 0;
                                                             RamAddr <= StackSize-3;
                                                         end

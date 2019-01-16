@@ -2,8 +2,6 @@
 `ifndef LIB_STYCZYNSKI_DEBOUNCER_V
 `define LIB_STYCZYNSKI_DEBOUNCER_V
 
-`include "../AdjClockDivider/AdjClockDividerStatic.v"
-
 /*
  * Piotr Styczyński @styczynski
  * Verilog Components Library

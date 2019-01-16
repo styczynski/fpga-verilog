@@ -2,10 +2,10 @@
 `ifndef LIB_STYCZYNSKI_MINI_CALC_V
 `define LIB_STYCZYNSKI_MINI_CALC_V
 
-`include "../RegMux/RegMux4.v"
-`include "../UnsignDividerComb/UnsignDividerComb.v"
-`include "../UnsignAddSub/UnsignAddSub.v"
-`include "../MinMax/MinMax.v"
+`include "../../components/RegMux/RegMux4.v"
+`include "../../components/UnsignDividerComb/UnsignDividerComb.v"
+`include "../../components/UnsignAddSub/UnsignAddSub.v"
+`include "../../components/MinMax/MinMax.v"
 
 /*
  * Piotr Styczyński @styczynski

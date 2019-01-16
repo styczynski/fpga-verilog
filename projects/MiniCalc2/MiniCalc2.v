@@ -2,11 +2,11 @@
 `ifndef LIB_STYCZYNSKI_MINI_CALC_2_V
 `define LIB_STYCZYNSKI_MINI_CALC_2_V
 
-`include "../UpDownCounter/UpDownCounter.v"
-`include "../Bin2BCDConverter/Bin2BCDConverter_4.v"
-`include "../SegmentLedHexDecoder/SegmentLedHexDecoder.v"
-`include "../Uart/UART.v"
-`include "./MiniCalc2Core.v"
+`include "../../components/UpDownCounter/UpDownCounter.v"
+`include "../../components/Bin2BCDConverter/Bin2BCDConverter_4.v"
+`include "../../components/SegmentLedHexDecoder/SegmentLedHexDecoder.v"
+`include "../../components/Uart/UART.v"
+`include "MiniCalc2Core.v"
 
 /*
  * Piotr Styczyński @styczynski
@@ -24,6 +24,7 @@ module MiniCalc2
     parameter STATE_BIT_WIDTH = 4,
     parameter STATE_IDLE = 4'b0000,
     parameter STATE_EXECUTE = 4'b0001,
+    parameter STATE_EXECUTING = 4'b0011,
     parameter STATE_EXECUTE_END = 4'b0010,
     parameter INPUT_BIT_WIDTH = 32
 )
@@ -40,8 +41,11 @@ module MiniCalc2
     input wire BtnExecute,
     input wire BtnOutputHi,
 	 input wire UartRxWire,
-	 output wire UartTxWire
+	 output wire UartTxWire,
+     output wire Ready
 );
+
+    assign Ready = ( State == STATE_IDLE );
 
 	 reg [15:0] CounterValue;
      reg ExecuteUart;
@@ -250,6 +254,12 @@ module MiniCalc2
             end
         else if(State == STATE_EXECUTE)
             begin
+                State <= STATE_EXECUTING;
+                CoreOutputByteCounter <= 0;
+                CoreExecute <= 0;
+            end
+        else if(State == STATE_EXECUTING)
+            begin
                 if(CoreReady)
                     begin
                         if(ExecuteUart) /* ExecuteUart */
@@ -271,7 +281,7 @@ module MiniCalc2
                     end
                 else
                     begin
-                        State <= STATE_EXECUTE;
+                        State <= STATE_EXECUTING;
                         CoreOutputByteCounter <= 0;
                         CoreExecute <= 0;
                     end
@@ -283,7 +293,7 @@ module MiniCalc2
                 if(BtnPushLow && State == STATE_IDLE)
                     begin
                         CoreInstruction <= 8'b00000001;
-                        CoreInput <= { 24'b0000000000000000000000000, Switch[7:0] };
+                        CoreInput <= { 24'b000000000000000000000000, Switch[7:0] };
                         CoreExecute <= 1;
                         State <= STATE_EXECUTE;
                         ExecuteUart <= 0;
@@ -293,7 +303,7 @@ module MiniCalc2
                 else if(BtnPushHi && State == STATE_IDLE)
                     begin
                         CoreInstruction <= 8'b00100001;
-                        CoreInput <= { 24'b0000000000000000000000000, Switch[7:0] };
+                        CoreInput <= { 24'b000000000000000000000000, Switch[7:0] };
                         CoreExecute <= 1;
                         State <= STATE_EXECUTE;
                         ExecuteUart <= 0;

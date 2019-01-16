@@ -1,5 +1,5 @@
 `timescale 1ns / 1ps
-`include "./MiniCalc.v"
+`include "MiniCalc.v"
 
 `define assert(signal, value) \
         #1; \
