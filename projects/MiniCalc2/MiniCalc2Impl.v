@@ -16,36 +16,34 @@ module MiniCalc2Impl
 );
 
     wire [3:0] BtnDebounced;
+    wire [7:0] SwitchSync;
      
-    Debouncer debounce0(
-        .Clk(Clk),
-        .Input(!Btn[0]),
-        .Output(BtnDebounced[0])
-    ); 
-     
-    Debouncer debounce1(
-        .Clk(Clk),
-        .Input(!Btn[1]),
-        .Output(BtnDebounced[1])
-    );
-     
-    Debouncer debounce2(
-        .Clk(Clk),
-        .Input(!Btn[2]),
-        .Output(BtnDebounced[2])
-    );
-     
-    Debouncer debounce3(
-        .Clk(Clk),
-        .Input(!Btn[3]),
-        .Output(BtnDebounced[3])
-    );
-
+    Genvar gi;
+    generate
+        for (gi=0; gi<=7; gi=gi+1) begin : gensynch
+            Synchronizer (
+                .Clk(Clk),
+                .Input(Switch[gi]),
+                .Output(SwitchSync[gi])
+            );
+        end
+    endgenerate
+    
+    generate
+        for (gi=0; gi<=3; gi=gi+1) begin : gensynch
+            Debouncer debounce0(
+                .Clk(Clk),
+                .Input(!Btn[gi]),
+                .Output(BtnDebounced[gi])
+            );
+        end
+    endgenerate
+    
     MiniCalc2 miniCalc2 (
         .Clk(Clk),
         .UartTxWire(IO_TXD),
         .UartRxWire(IO_RXD),
-        .Switch(Switch),
+        .Switch(SwitchSync),
         .BtnPushLow(BtnDebounced[1]),
         .BtnPushHi(BtnDebounced[2]),
         .BtnExecute(BtnDebounced[3]),

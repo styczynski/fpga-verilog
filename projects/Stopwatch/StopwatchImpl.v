@@ -1,4 +1,5 @@
 `include "../../components/Debouncer/Debouncer.v"
+`include "../../components/Debouncer/Synchronizer.v"
 `include "Stopwatch.v"
 
 module StopwatchImpl
@@ -15,30 +16,28 @@ module StopwatchImpl
 
     wire [3:0] BtnDebounced;
     wire BtnExtDebounced;
+    wire [6:0] SwitchSync;
      
-    Debouncer debounce0(
-        .Clk(Clk),
-        .Input(!Btn[0]),
-        .Output(BtnDebounced[0])
-    );
-     
-    Debouncer debounce1(
-        .Clk(Clk),
-        .Input(!Btn[1]),
-        .Output(BtnDebounced[1])
-    );
-     
-    Debouncer debounce2(
-        .Clk(Clk),
-        .Input(!Btn[2]),
-        .Output(BtnDebounced[2])
-    );
-     
-    Debouncer debounce3(
-        .Clk(Clk),
-        .Input(!Btn[3]),
-        .Output(BtnDebounced[3])
-    );
+    Genvar gi;
+    generate
+        for (gi=0; gi<=5; gi=gi+1) begin : gensynch
+            Synchronizer (
+                .Clk(Clk),
+                .Input(Switch[gi]),
+                .Output(SwitchSync[gi])
+            );
+        end
+    endgenerate
+    
+    generate
+        for (gi=0; gi<=3; gi=gi+1) begin : gensynch
+            Debouncer debounce0(
+                .Clk(Clk),
+                .Input(!Btn[gi]),
+                .Output(BtnDebounced[gi])
+            );
+        end
+    endgenerate
      
     Debouncer debounceExtBtn(
         .Clk(Clk),
@@ -49,12 +48,12 @@ module StopwatchImpl
     Stopwatch stopwatch (
         .Clk(Clk),
         .Clk2(BtnExtDebounced),
-        .ClkSel(Switch[5]),
+        .ClkSel(SwitchSync[5]),
         .Reset(BtnDebounced[0]),
         .Stop(BtnDebounced[1]),
         .Up(BtnDebounced[2]),
         .Down(BtnDebounced[3]),
-        .Speed(Switch[4:0]),
+        .Speed(SwitchSync[4:0]),
         .ModeOutput0(LED[0]),
         .ModeOutput1(LED[1]),
         .ModeOutput2(LED[2]),
