@@ -40,14 +40,14 @@ module MiniCalc2
     input wire BtnPushHi,
     input wire BtnExecute,
     input wire BtnOutputHi,
-	input wire UartRxWire,
-	output wire UartTxWire,
+    input wire UartRxWire,
+    output wire UartTxWire,
     output wire Ready
 );
 
     assign Ready = ( State == STATE_IDLE );
 
-	reg [15:0] CounterValue;
+    reg [15:0] CounterValue;
     reg ExecuteUart;
     
     wire [3:0] CounterBCDDigit3;
@@ -59,21 +59,21 @@ module MiniCalc2
     reg UartOutputEnable;
     wire UartOutputIdle;
     
-	wire [7:0] UartInputData;
-	reg UartInputEnable;
-	wire UartInputReady;
-	 
-	reg [0:7] CoreInstruction;
+    wire [7:0] UartInputData;
+    reg UartInputEnable;
+    wire UartInputReady;
+     
+    reg [0:7] CoreInstruction;
     reg [0:INPUT_BIT_WIDTH-1] CoreInput;
     wire [0:INPUT_BIT_WIDTH-1] CoreOutput;
     wire [0:INPUT_BIT_WIDTH-1] CoreStackFirst;
     wire [0:INPUT_BIT_WIDTH-1] CoreStackSecond;
     wire [0:STACK_ADDR_SIZE-1] CoreStackSize;
     wire CoreError;
-	reg CoreExecute;
+    reg CoreExecute;
     wire CoreReady;
     wire CoreStackEmpty;
-	 
+     
     reg UartNotResetInput;
     reg UartNotResetOutput;
      
@@ -81,20 +81,20 @@ module MiniCalc2
         .FREQ(100_000_000),
         .BAUD(460800)
     ) uartModuleIn (
-	    .clk(Clk),
-		.reset(UartNotResetInput),
+        .clk(Clk),
+        .reset(UartNotResetInput),
         .rx_i(UartRxWire),
-		.rx_data_o(UartInputData),
-		.rx_ack_i(UartInputEnable),
-		.rx_ready_o(UartInputReady)
+        .rx_data_o(UartInputData),
+        .rx_ack_i(UartInputEnable),
+        .rx_ready_o(UartInputReady)
     );
     
     UART #(
         .FREQ(100_000_000),
         .BAUD(460800)
     ) uartModuleOut (
-	    .clk(Clk),
-		.reset(UartNotResetOutput),
+        .clk(Clk),
+        .reset(UartNotResetOutput),
         .tx_o(UartTxWire),
         .tx_data_i(UartOutputData),
         .tx_ready_i(UartOutputEnable),
@@ -104,12 +104,12 @@ module MiniCalc2
     Bin2BCDConverter_4 #(
         .INPUT_BIT_WIDTH(16)
     ) bin2BCDConverter (
-		.Input(CounterValue),
+        .Input(CounterValue),
         .Digit3(CounterBCDDigit3),
         .Digit2(CounterBCDDigit2),
         .Digit1(CounterBCDDigit1),
         .Digit0(CounterBCDDigit0)
-	);
+    );
     
     SegmentLedHexDecoder hexDecoder3 (
         .HexDigit(CounterBCDDigit3),
@@ -135,22 +135,22 @@ module MiniCalc2
         .Undefined(CoreStackEmpty)
     );
     
-	MiniCalc2Core #(
+    MiniCalc2Core #(
         .INPUT_BIT_WIDTH(INPUT_BIT_WIDTH),
         .STACK_ADDR_SIZE(STACK_ADDR_SIZE)
     ) core (
-		.Clk(Clk),
-		.Instruction(CoreInstruction),
+        .Clk(Clk),
+        .Instruction(CoreInstruction),
         .InputA(CoreInput),
         .OutputA(CoreOutput),
-		.Execute(CoreExecute),
+        .Execute(CoreExecute),
         .Ready(CoreReady),
         .StackFirst(CoreStackFirst),
         .StackSecond(CoreStackSecond),
         .StackEmpty(CoreStackEmpty),
         .StackSize(CoreStackSize),
         .OperationalError(CoreError)
-	);
+    );
     
     reg [7:0] UartInputBuffer [0:(1<<UART_BUFFER_ADDR_BIT_WIDTH)-1];
     reg [0:UART_BUFFER_ADDR_BIT_WIDTH-1] UartInputBufferPointer;
@@ -456,7 +456,7 @@ module MiniCalc2
             end
         
     end
-	 
+     
 endmodule
 
 
