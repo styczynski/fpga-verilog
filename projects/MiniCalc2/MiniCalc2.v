@@ -5,7 +5,8 @@
 `include "../../components/UpDownCounter/UpDownCounter.v"
 `include "../../components/Bin2BCDConverter/Bin2BCDConverter_4.v"
 `include "../../components/SegmentLedHexDecoder/SegmentLedHexDecoder.v"
-`include "../../components/Uart/UART.v"
+`include "../../components/Uart/UartRx.v"
+`include "../../components/Uart/UartTx.v"
 `include "MiniCalc2Core.v"
 
 /*
@@ -77,28 +78,28 @@ module MiniCalc2
     reg UartNotResetInput;
     reg UartNotResetOutput;
      
-    UART #(
-        .FREQ(100_000_000),
-        .BAUD(460800)
+    UartRx #(
+        .CLOCK_FREQUENCY(100_000_000),
+        .BAUD_RATE(460800)
     ) uartModuleIn (
-        .clk(Clk),
-        .reset(UartNotResetInput),
-        .rx_i(UartRxWire),
-        .rx_data_o(UartInputData),
-        .rx_ack_i(UartInputEnable),
-        .rx_ready_o(UartInputReady)
+        .Clk(Clk),
+        .Reset(UartNotResetInput),
+        .RxWire(UartRxWire),
+        .RxDataOutput(UartInputData),
+        .RxEnable(UartInputEnable),
+        .RxReady(UartInputReady)
     );
     
-    UART #(
-        .FREQ(100_000_000),
-        .BAUD(460800)
+    UartTx #(
+        .CLOCK_FREQUENCY(100_000_000),
+        .BAUD_RATE(460800)
     ) uartModuleOut (
-        .clk(Clk),
-        .reset(UartNotResetOutput),
-        .tx_o(UartTxWire),
-        .tx_data_i(UartOutputData),
-        .tx_ready_i(UartOutputEnable),
-        .tx_ack_o(UartOutputIdle)
+        .Clk(Clk),
+        .Reset(UartNotResetOutput),
+        .TxWire(UartTxWire),
+        .TxDataInput(UartOutputData),
+        .TxReady(UartOutputIdle),
+        .TxEnable(UartOutputEnable)
     );
 
     Bin2BCDConverter_4 #(

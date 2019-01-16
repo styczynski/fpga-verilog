@@ -21,7 +21,7 @@ module AdjClockDivider
     input ClkEnable,
     input [(INPUT_BIT_WIDTH-1):0] FrequencyDividerFactor,
     output reg ClkOutput,
-	 output reg ClkEnableOutput
+	output reg ClkEnableOutput
 );
 
     reg [(INPUT_BIT_WIDTH-1):0] InternalCounter;
