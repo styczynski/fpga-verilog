@@ -17,23 +17,23 @@ module MinMax
 )
 (
     input Clk,
-    input signed [INPUT_BIT_WIDTH-1:0] InputA,
-	input signed [INPUT_BIT_WIDTH-1:0] InputB,
-	output reg [INPUT_BIT_WIDTH-1:0] ResultA,
-    output reg [INPUT_BIT_WIDTH-1:0] ResultB
+    input [INPUT_BIT_WIDTH-1:0] InputA,
+	input [INPUT_BIT_WIDTH-1:0] InputB,
+	output reg [INPUT_BIT_WIDTH-1:0] Max,
+    output reg [INPUT_BIT_WIDTH-1:0] Min
 );
 
     always @(posedge Clk)
 	begin
 		if(InputA < InputB)
             begin
-                ResultA <= InputB;
-                ResultB <= InputA;
+                Max <= InputB;
+                Min <= InputA;
             end
         else
             begin
-                ResultA <= InputA;
-                ResultB <= InputB;
+                Max <= InputA;
+                Min <= InputB;
             end
 	end
 
