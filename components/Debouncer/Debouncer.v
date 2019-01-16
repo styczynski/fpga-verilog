@@ -11,23 +11,26 @@
  *
  * MIT License
  */
-module debounce(
+module Debouncer
+#(
+    parameter DEBOUNCER_COUNTER_WIDTH = 19
+) (
     input Clk,
     input Input,
-    output reg State,
+    output reg State = 0,
     output Output
 );
 
-    reg Sync0, Sync1;
-    always @(posedge Clk) Sync0 <= Input;
-    always @(posedge Clk) Sync1 <= Sync0;
+    reg Sync0 = 0, Sync1 = 0;
 
-    reg [18:0] Counter;
+    reg [DEBOUNCER_COUNTER_WIDTH-1:0] Counter;
     wire Idle = (State == Sync1);
     wire Max = &Counter;
 
     always @(posedge Clk)
     begin
+        Sync0 <= Input;
+        Sync1 <= Sync0;
         if(Idle)
             Counter <= 0;
         else
