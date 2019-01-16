@@ -17,18 +17,25 @@ module SignAddSub
 )
 (
     input Clk,
-    input signed [INPUT_BIT_WIDTH-1:0] InputA,
-	input signed [INPUT_BIT_WIDTH-1:0] InputB,
+    input [INPUT_BIT_WIDTH-1:0] InputA,
+	input [INPUT_BIT_WIDTH-1:0] InputB,
 	input wire AddSubMode,
-	output reg signed [INPUT_BIT_WIDTH-1:0] Result
+	output reg [INPUT_BIT_WIDTH-1:0] Result,
+    output reg [INPUT_BIT_WIDTH-1:0] ResultB
 );
 
     always @(posedge Clk)
 	begin
 		if(AddSubMode)
-			Result <= InputA + InputB;
+            begin
+                Result <= InputA + InputB;
+                ResultB <= InputA - InputB;
+            end
 		else
-			Result <= InputA - InputB;
+            begin
+                Result <= InputA - InputB;
+                ResultB <= InputA + InputB;
+            end
 	end
 
 endmodule

@@ -4,7 +4,7 @@
 
 `include "../../components/RegMux/RegMux4.v"
 `include "../../components/UnsignDividerComb/UnsignDividerComb.v"
-`include "../../components/UnsignAddSub/UnsignAddSub.v"
+`include "../../components/SignAddSub/SignAddSub.v"
 `include "../../components/MinMax/MinMax.v"
 
 /*
@@ -79,11 +79,11 @@ module MiniCalc
 		.Clk(Clk)
 	);
     
-    UnsignAddSub #(
+    SignAddSub #(
         .INPUT_BIT_WIDTH(INPUT_BIT_WIDTH)
     ) addSubModule (
-        .ResultA(AddSubAOutput),
-        .ResultB(AddSubBOutput),
+        .Result(AddSubBOutput),
+        .ResultB(AddSubAOutput),
         .InputA(InputA),
         .InputB(InputB),
         .Clk(Clk)
@@ -92,8 +92,8 @@ module MiniCalc
     MinMax #(
         .INPUT_BIT_WIDTH(INPUT_BIT_WIDTH)
     ) minMaxModule (
-        .ResultA(MinMaxAOutput),
-        .ResultB(MinMaxBOutput),
+        .Max(MinMaxAOutput),
+        .Min(MinMaxBOutput),
         .InputA(InputA),
         .InputB(InputB),
         .Clk(Clk)

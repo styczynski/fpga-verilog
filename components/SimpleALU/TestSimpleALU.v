@@ -1,5 +1,15 @@
 `timescale 1ns / 1ps
+`include "../../utils/test.v"
 `include "SimpleALU.v"
+
+`define do_op(code, a, b, out) \
+        wait(Ready == 1); \
+        Instruction = code; \
+        InputA = a; \
+        InputB = b; \
+        wait(Ready == 0); \
+        wait(Ready == 1); \
+        `assert(ResultA, out);
 
 /*
  * Piotr Styczyński @styczynski
@@ -12,7 +22,7 @@
  */
 module TestSimpleALU
 #(
-	parameter INPUT_BIT_WIDTH  = 8,
+    parameter INPUT_BIT_WIDTH  = 8,
     parameter INSTR_BIT_WIDTH  = 5,
     parameter FLAGS_COUNT      = 1,
     parameter CODE_INSTR_NOP   = 5'b00000,
@@ -34,20 +44,20 @@ module TestSimpleALU
 );
 
     // Inputs
-	reg Clk;
+    `defClock(Clk, 2);
     reg [INSTR_BIT_WIDTH-1:0] Instruction;
     reg [INPUT_BIT_WIDTH-1:0] InputA;
     reg [INPUT_BIT_WIDTH-1:0] InputB;
 
-	// Outputs
-	wire [INPUT_BIT_WIDTH-1:0] ResultA;
+    // Outputs
+    wire [INPUT_BIT_WIDTH-1:0] ResultA;
     wire [INPUT_BIT_WIDTH-1:0] ResultB;
     wire [FLAGS_COUNT-1:0] Flags;
     wire Ready;
 
-	// Instantiate the Unit Under Test (UUT)
-	SimpleALU uut (
-		.Clk(Clk),
+    // Instantiate the Unit Under Test (UUT)
+    SimpleALU uut (
+        .Clk(Clk),
         .Instruction(Instruction),
         .InputA(InputA),
         .InputB(InputB),
@@ -55,65 +65,39 @@ module TestSimpleALU
         .ResultB(ResultB),
         .Flags(Flags),
         .Ready(Ready)
-	);
+    );
 
-	initial begin
-		// Initialize Inputs
-		
+    `startTest("SimpleALU")
+        // Initialize Inputs
         Clk = 0;
-        Instruction = CODE_INSTR_ADD;
-        InputA = 15;
-        InputB = 7;
+        Instruction = CODE_INSTR_NOP;
+        InputA = 0;
+        InputB = 0;
+        #100;
+        
+        `describe("Test add operation");
+            `do_op(CODE_INSTR_ADD, 15, 7, 22);
+          
+        `describe("Test gth operation");
+            `do_op(CODE_INSTR_GTH, 15, 7, 255);
+       
+       `describe("Test or operation");
+            `do_op(CODE_INSTR_OR, 15, 7, 15);
+       
+       `describe("Test sub operation");
+            `do_op(CODE_INSTR_SUB, 15, 7, 8);
+       
+       `describe("Test shl operation");
+            `do_op(CODE_INSTR_SHL, 15, 7, 30);
+       
+       `describe("Test add operation");
+            `do_op(CODE_INSTR_MUL, 15, 7, 105);
+       
+       `describe("Test div operation");
+            `do_op(CODE_INSTR_DIV, 15, 7, 2);
 
-		// Wait 100 ns for global reset to finish
-		#100;
-        
-		  Instruction = CODE_INSTR_GTH;
-        InputA = 15;
-        InputB = 7;
-		  
-		#100;
-        
-		  Instruction = CODE_INSTR_OR;
-        InputA = 15;
-        InputB = 7;
-		
-		#100;
-        
-		  Instruction = CODE_INSTR_SUB;
-        InputA = 15;
-        InputB = 7;
-		  
-		#100;
-        
-		  Instruction = CODE_INSTR_SHL;
-        InputA = 15;
-        InputB = 7;
-		  
-		#100;
-        
-		  Instruction = CODE_INSTR_MUL;
-        InputA = 15;
-        InputB = 7;
-		
-		#100;
-        
-        Instruction = CODE_INSTR_DIV;
-        InputA = 15;
-        InputB = 7;
-        
-        #500;
-		// Add stimulus here
-
-	end
-
-   initial begin
-		$monitor("Clk=%d, Instruction=%d, InputA=%d, InputB=%d, ResultA=%d, ResultB=%d, Flags=%d, Ready=%d", Clk, Instruction, InputA, InputB, ResultA, ResultB, Flags, Ready);
-	end
-      
-	always begin
-		   Clk = #10 ~Clk;
-	end
+    `endTest
+   
       
 endmodule
 

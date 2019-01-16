@@ -1,12 +1,14 @@
 `timescale 1ns / 1ps
+`include "../../utils/test.v"
 `include "MiniCalc.v"
 
-`define assert(signal, value) \
-        #1; \
-        if (signal !== value) begin \
-            $display("ASSERTION FAILED in %m: signal != value"); \
-            $finish; \
-        end
+`define do_op(code, a, b, outA, outB) \
+        Instruction = code; \
+        InputA = a; \
+        InputB = b; \
+        #100; \
+        `assert(OutputA, outA); \
+        `assert(OutputB, outB);
 
 /*
  * Piotr Styczyński @styczynski
@@ -28,7 +30,7 @@ module TestMiniCalc
 );
 
     // Inputs
-	reg Clk;
+	`defClock(Clk, 2);
     reg [INSTR_BIT_WIDTH-1:0] Instruction;
     reg [INPUT_BIT_WIDTH-1:0] InputA;
     reg [INPUT_BIT_WIDTH-1:0] InputB;
@@ -47,105 +49,40 @@ module TestMiniCalc
         .OutputB(OutputB)
 	);
 
-	initial begin
-		// Initialize Inputs
-		
+	`startTest("MiniCalc")
+		// Initialize Input
         Clk = 0;
-        Instruction = CODE_INSTR_ADD_SUB;
-        InputA = 6;
-        InputB = 3;
-        
+        Instruction = CODE_INSTR_NOP;
+        InputA = 0;
+        InputB = 0;
         #100;
         
-        `assert(OutputA, 9);
-		`assert(OutputB, 3);
-        
-		Instruction = CODE_INSTR_MIN_MAX;
-        InputA = 6;
-        InputB = 3;
-        #2;
+        `describe("Test add/sub operation");
+            `do_op(CODE_INSTR_ADD_SUB, 6, 3, 9, 3);
+            `do_op(CODE_INSTR_ADD_SUB, 8, 5, 13, 3);
             
-        `assert(OutputA, 6);
-		`assert(OutputB, 3);
+         `describe("Test min/max operation");
+            `do_op(CODE_INSTR_MIN_MAX, 6, 3, 6, 3);
+            `do_op(CODE_INSTR_MIN_MAX, 10, 2, 10, 2);
+            `do_op(CODE_INSTR_MIN_MAX, 3, 11, 11, 3);
+            `do_op(CODE_INSTR_MIN_MAX, 0, 2, 2, 0);
+            
+        `describe("Test min/max operation when swapping");
+            `do_op(CODE_INSTR_MIN_MAX, 8, 5, 8, 5);
+            `do_op(CODE_INSTR_MIN_MAX, 5, 8, 8, 5);
         
-		Instruction = CODE_INSTR_MUL;
-        InputA = 6;
-        InputB = 3;
-        #2;
+        `describe("Test mul operation");
+            `do_op(CODE_INSTR_MUL, 6, 3, 18, 0);
         
-        `assert(({OutputB, OutputA}), 18);
-  
-		Instruction = CODE_INSTR_NOP;
-        InputA = 6;
-        InputB = 3;
-        #2;
+        `describe("Test nop operation");
+            `do_op(CODE_INSTR_NOP, 6, 3, 0, 0);
         
-        `assert(OutputA, 0);
-		`assert(OutputB, 0);
-     
-		Instruction = CODE_INSTR_ADD_SUB;
-        InputA = 8;
-        InputB = 5;
-		#5;
+        `describe("Test div operation");
+            `do_op(CODE_INSTR_DIV, 15, 2, 7, 1);
         
-        `assert(OutputA, 13);
-		`assert(OutputB, 3);
         
-		Instruction = CODE_INSTR_MIN_MAX;
-        InputA = 8;
-        InputB = 5;
-		#2;
-        
-        `assert(OutputA, 8);
-		`assert(OutputB, 5);
-       
-        Instruction = CODE_INSTR_MIN_MAX;
-        InputA = 5;
-        InputB = 8;
-        #2;
-        
-        `assert(OutputA, 8);
-		`assert(OutputB, 5);
-        
-        Instruction = CODE_INSTR_DIV;
-        InputA = 15;
-        InputB = 2;
-        #2;
-        
-        `assert(OutputA, 7);
-		`assert(OutputB, 1);
-        
-        Instruction = CODE_INSTR_DIV;
-        InputA = 10;
-        InputB = 2;
-        #5;
-        
-        `assert(OutputA, 5);
-		`assert(OutputB, 0);
-        
-        Instruction = CODE_INSTR_DIV;
-        InputA = 3;
-        InputB = 11;
-        #5;
-        
-        `assert(OutputA, 0);
-		`assert(OutputB, 3);
-        
-        Instruction = CODE_INSTR_DIV;
-        InputA = 0;
-        InputB = 2;
-        #2;
-        
-        `assert(OutputA, 0);
-		`assert(OutputB, 0);
-        
-        $finish;
-	end
+    `endTest
 
-      
-	always begin
-		#1 Clk = ~Clk;
-	end
       
 endmodule
 

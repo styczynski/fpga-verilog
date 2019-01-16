@@ -20,10 +20,10 @@ module UpDownCounter
 )
 (
     input Clk,
-	 input ClkEnable,
+	input ClkEnable,
     input Reset,
     input UpDownMode,
-	 input Stop,
+	input Stop,
     output reg [INPUT_BIT_WIDTH-1:0] Output,
     output reg LimitReachedFlag
 );

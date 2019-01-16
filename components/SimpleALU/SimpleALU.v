@@ -4,6 +4,7 @@
 
 `include "../SignAddSub/SignAddSub.v"
 `include "../SignDivider/SignDivider.v"
+`include "../RegMux/RegMux4.v"
 
 /*
  * Piotr Styczyński @styczynski

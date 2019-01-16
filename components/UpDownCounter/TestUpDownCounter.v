@@ -1,21 +1,6 @@
 `timescale 1ns / 1ps
-`include "./UpDownCounter.v"
-
-`define assert(label, signal, value) \
-        #1; \
-        if (signal !== value) begin \
-            $display("ASSERTION FAILED in %m: "); \
-            $display("   [%s] signal != [%d] Got: [%d]", label, value, signal); \
-            $finish; \
-        end
-        
-`define runClkTicks(ticksNo)     \
-    for(i=0; i<ticksNo; i=i+1)   \
-        begin                    \
-            #2 Clk = 0;          \
-            #2 Clk = 1;          \
-            #2 Clk = 0;          \
-        end
+`include "../../utils/test.v"
+`include "./UpDownCounter.v"       
         
 `define runReset                 \
     #2 Reset = 1;                \
@@ -41,7 +26,7 @@ module TestUpDownCounter
 );
 
     // Inputs
-    reg Clk;
+    `defClock(Clk, 2);
     reg Reset;
     reg UpDownMode;
     
@@ -54,7 +39,9 @@ module TestUpDownCounter
         .INPUT_BIT_WIDTH(INPUT_BIT_WIDTH)
     ) uut(
 		.Clk(Clk),
+        .ClkEnable(1'b1),
         .Reset(Reset),
+        .Stop(1'b0),
         .UpDownMode(UpDownMode),
         .Output(Output),
         .LimitReachedFlag(LimitReachedFlag)
@@ -62,42 +49,37 @@ module TestUpDownCounter
     
     integer i;
     
-	initial begin
+	`startTest("UpDownCounter")
 		// Initialize Inputs
-		
         Reset      = 1;
         Clk        = 0;
         UpDownMode = 1;
-        
         #100;
         
-        `countUp
-        `runReset
-        `runClkTicks(5);
-        `assert("Assertion 1", Output, 5);
+        `describe("Test basic up counting");
+            `countUp;
+            `runReset;
+            #10; `assert(Output, 5);
         
-        `countDown
-        `runClkTicks(3);
-        `assert("Assertion 2", Output, 2);
+        `describe("Test basic down counting");
+            `countDown;
+            #6; `assert(Output, 2);
         
-        `runClkTicks(10);
-        `assert("Assertion 3", Output, 0);
+            #20; `assert(Output, 0);
+            
+        `describe("Test overflow prevention");
+            `countUp;
+            #254; `assert(Output, 128);
+            
+            #(2 ** 9); `assert(Output, 2 ** 8 - 1);
         
-        `runClkTicks(10);
-        `assert("Assertion 4", Output, 0);
-        
-        `countUp
-        `runClkTicks(127);
-        `assert("Assertion 5", Output, 127);
-        
-        `runClkTicks(2 ** 8);
-        `assert("Assertion 6", Output, 2 ** 8 - 1);
-        
-        `runReset
-        `assert("Assertion 7", Output, 0);
-        
-        $finish;
-	end
+        `describe("Test counter reset");
+            Reset = 1;
+            #2;
+            `assert(Output, 0);
+    
+    `endTest    
+    
       
 endmodule
 

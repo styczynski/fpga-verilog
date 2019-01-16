@@ -29,8 +29,8 @@
   * Macro to end the test block started by startTest
   */
 `define endTest                                                          \
-        $display("\n    Total number of assertions: %d", assertionsNo);  \
-        $display("    Total number of tests:      %d", testNo);          \
+        $display("\n      Total number of assertions: %d", assertionsNo);  \
+        $display("      Total number of tests:      %d", testNo);          \
         $finish;                                                         \
         end
 
