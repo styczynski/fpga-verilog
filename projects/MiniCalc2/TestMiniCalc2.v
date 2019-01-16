@@ -80,17 +80,17 @@ module TestMiniCalc
 );
 
     // Inputs
-	`defClock(Clk, 2);
+    `defClock(Clk, 2);
     reg [3:0] Btn;
     reg [7:0] Switch;
-	reg IO_RXD;
+    reg IO_RXD;
 
-	// Outputs
-	wire [0:7] LED;
+    // Outputs
+    wire [0:7] LED;
     wire [0:6] IO_LED1;
-	wire [0:6] IO_LED2;
-	wire [0:6] IO_LED3;
-	wire [0:6] IO_LED4;
+    wire [0:6] IO_LED2;
+    wire [0:6] IO_LED3;
+    wire [0:6] IO_LED4;
     wire IO_TXD;
     wire Ready;
     
@@ -104,11 +104,11 @@ module TestMiniCalc
     wire [3:0] Digit4;
     wire DigitUndefined4;
 
-	// Instantiate the Unit Under Test (UUT)
-	MiniCalc2 uut (
+    // Instantiate the Unit Under Test (UUT)
+    MiniCalc2 uut (
         .Clk(Clk),
-		.UartTxWire(IO_TXD),
-		.UartRxWire(IO_RXD),
+        .UartTxWire(IO_TXD),
+        .UartRxWire(IO_RXD),
         .Switch(Switch),
         .BtnPushLow(Btn[1]),
         .BtnPushHi(Btn[2]),
@@ -147,9 +147,9 @@ module TestMiniCalc
     );
     
     integer k;
-	`startTest("TestMiniCalc")
-		// Initialize Inputs
-		
+    `startTest("TestMiniCalc")
+        // Initialize Inputs
+        
         Clk = 0;
         Btn = 0;
         Switch = 0;
@@ -317,7 +317,7 @@ module TestMiniCalc
                 k = k + 1;
                 if(k>=250)
                     begin
-                      k = 0;  
+                        k = 0;  
                     end
                 `do_push(k);
                 `assertDigitsValue(k);
@@ -341,7 +341,7 @@ module TestMiniCalc
             `assertDigitsUndefined(1);
             `assert(LED[7], 0);
             
-	`endTest
+    `endTest
       
 endmodule
 

@@ -8,43 +8,43 @@ module MiniCalc2Impl
     input [7:0] Switch,
     output wire [0:7] LED,
     output wire [0:6] IO_LED1,
-	 output wire [0:6] IO_LED2,
-	 output wire [0:6] IO_LED3,
-	 output wire [0:6] IO_LED4,
-	 input wire IO_RXD,
-	 output wire IO_TXD
+    output wire [0:6] IO_LED2,
+    output wire [0:6] IO_LED3,
+    output wire [0:6] IO_LED4,
+    input wire IO_RXD,
+    output wire IO_TXD
 );
 
-	wire [3:0] BtnDebounced;
-	 
+    wire [3:0] BtnDebounced;
+     
     debounce debounce0(
-	     .Clk(Clk),
-		  .Input(!Btn[0]),
-		  .Output(BtnDebounced[0])
-	 ); 
-	 
-	 debounce debounce1(
-	     .Clk(Clk),
-		  .Input(!Btn[1]),
-		  .Output(BtnDebounced[1])
-	 );
-	 
-	 debounce debounce2(
-	     .Clk(Clk),
-		  .Input(!Btn[2]),
-		  .Output(BtnDebounced[2])
-	 );
-	 
-	 debounce debounce3(
-	     .Clk(Clk),
-		  .Input(!Btn[3]),
-		  .Output(BtnDebounced[3])
-	 );
+        .Clk(Clk),
+        .Input(!Btn[0]),
+        .Output(BtnDebounced[0])
+    ); 
+     
+    debounce debounce1(
+        .Clk(Clk),
+        .Input(!Btn[1]),
+        .Output(BtnDebounced[1])
+    );
+     
+    debounce debounce2(
+        .Clk(Clk),
+        .Input(!Btn[2]),
+        .Output(BtnDebounced[2])
+    );
+     
+    debounce debounce3(
+        .Clk(Clk),
+        .Input(!Btn[3]),
+        .Output(BtnDebounced[3])
+    );
 
     MiniCalc2 miniCalc2 (
         .Clk(Clk),
-		.UartTxWire(IO_TXD),
-		.UartRxWire(IO_RXD),
+        .UartTxWire(IO_TXD),
+        .UartRxWire(IO_RXD),
         .Switch(Switch),
         .BtnPushLow(BtnDebounced[1]),
         .BtnPushHi(BtnDebounced[2]),

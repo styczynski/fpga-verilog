@@ -18,7 +18,7 @@
  */
 module TestMiniCalc
 #(
-	parameter INPUT_BIT_WIDTH  = 8,
+    parameter INPUT_BIT_WIDTH  = 8,
     parameter INSTR_BIT_WIDTH  = 4,
     parameter CODE_INSTR_NOP       = 4'b1111,
     parameter CODE_INSTR_ADD_SUB   = 4'b0111,
@@ -28,28 +28,28 @@ module TestMiniCalc
 );
 
     // Inputs
-	reg Clk;
+    reg Clk;
     reg [INSTR_BIT_WIDTH-1:0] Instruction;
     reg [INPUT_BIT_WIDTH-1:0] InputA;
     reg [INPUT_BIT_WIDTH-1:0] InputB;
 
-	// Outputs
-	wire [INPUT_BIT_WIDTH-1:0] OutputA;
+    // Outputs
+    wire [INPUT_BIT_WIDTH-1:0] OutputA;
     wire [INPUT_BIT_WIDTH-1:0] OutputB;
 
-	// Instantiate the Unit Under Test (UUT)
-	MiniCalc uut (
-		.Clk(Clk),
+    // Instantiate the Unit Under Test (UUT)
+    MiniCalc uut (
+        .Clk(Clk),
         .Instruction(Instruction),
         .InputA(InputA),
         .InputB(InputB),
         .OutputA(OutputA),
         .OutputB(OutputB)
-	);
+    );
 
-	initial begin
-		// Initialize Inputs
-		
+    initial begin
+        // Initialize Inputs
+        
         Clk = 0;
         Instruction = CODE_INSTR_ADD_SUB;
         InputA = 6;
@@ -58,46 +58,46 @@ module TestMiniCalc
         #100;
         
         `assert(OutputA, 9);
-		`assert(OutputB, 3);
+        `assert(OutputB, 3);
         
-		Instruction = CODE_INSTR_MIN_MAX;
+        Instruction = CODE_INSTR_MIN_MAX;
         InputA = 6;
         InputB = 3;
         #2;
             
         `assert(OutputA, 6);
-		`assert(OutputB, 3);
+        `assert(OutputB, 3);
         
-		Instruction = CODE_INSTR_MUL;
+        Instruction = CODE_INSTR_MUL;
         InputA = 6;
         InputB = 3;
         #2;
         
         `assert(({OutputB, OutputA}), 18);
   
-		Instruction = CODE_INSTR_NOP;
+        Instruction = CODE_INSTR_NOP;
         InputA = 6;
         InputB = 3;
         #2;
         
         `assert(OutputA, 0);
-		`assert(OutputB, 0);
+        `assert(OutputB, 0);
      
-		Instruction = CODE_INSTR_ADD_SUB;
+        Instruction = CODE_INSTR_ADD_SUB;
         InputA = 8;
         InputB = 5;
-		#5;
+        #5;
         
         `assert(OutputA, 13);
-		`assert(OutputB, 3);
+        `assert(OutputB, 3);
         
-		Instruction = CODE_INSTR_MIN_MAX;
+        Instruction = CODE_INSTR_MIN_MAX;
         InputA = 8;
         InputB = 5;
-		#2;
+        #2;
         
         `assert(OutputA, 8);
-		`assert(OutputB, 5);
+        `assert(OutputB, 5);
        
         Instruction = CODE_INSTR_MIN_MAX;
         InputA = 5;
@@ -105,7 +105,7 @@ module TestMiniCalc
         #2;
         
         `assert(OutputA, 8);
-		`assert(OutputB, 5);
+        `assert(OutputB, 5);
         
         Instruction = CODE_INSTR_DIV;
         InputA = 15;
@@ -113,7 +113,7 @@ module TestMiniCalc
         #2;
         
         `assert(OutputA, 7);
-		`assert(OutputB, 1);
+        `assert(OutputB, 1);
         
         Instruction = CODE_INSTR_DIV;
         InputA = 10;
@@ -121,7 +121,7 @@ module TestMiniCalc
         #5;
         
         `assert(OutputA, 5);
-		`assert(OutputB, 0);
+        `assert(OutputB, 0);
         
         Instruction = CODE_INSTR_DIV;
         InputA = 3;
@@ -129,7 +129,7 @@ module TestMiniCalc
         #5;
         
         `assert(OutputA, 0);
-		`assert(OutputB, 3);
+        `assert(OutputB, 3);
         
         Instruction = CODE_INSTR_DIV;
         InputA = 0;
@@ -137,15 +137,15 @@ module TestMiniCalc
         #2;
         
         `assert(OutputA, 0);
-		`assert(OutputB, 0);
+        `assert(OutputB, 0);
         
         $finish;
-	end
+    end
 
       
-	always begin
-		#1 Clk = ~Clk;
-	end
+    always begin
+        #1 Clk = ~Clk;
+    end
       
 endmodule
 

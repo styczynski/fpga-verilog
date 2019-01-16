@@ -40,15 +40,15 @@ module MiniCalc2
     input wire BtnPushHi,
     input wire BtnExecute,
     input wire BtnOutputHi,
-	 input wire UartRxWire,
-	 output wire UartTxWire,
-     output wire Ready
+	input wire UartRxWire,
+	output wire UartTxWire,
+    output wire Ready
 );
 
     assign Ready = ( State == STATE_IDLE );
 
-	 reg [15:0] CounterValue;
-     reg ExecuteUart;
+	reg [15:0] CounterValue;
+    reg ExecuteUart;
     
     wire [3:0] CounterBCDDigit3;
     wire [3:0] CounterBCDDigit2;
@@ -59,23 +59,23 @@ module MiniCalc2
     reg UartOutputEnable;
     wire UartOutputIdle;
     
-	 wire [7:0] UartInputData;
-	 reg UartInputEnable;
-	 wire UartInputReady;
+	wire [7:0] UartInputData;
+	reg UartInputEnable;
+	wire UartInputReady;
 	 
-	 reg [0:7] CoreInstruction;
-     reg [0:INPUT_BIT_WIDTH-1] CoreInput;
-     wire [0:INPUT_BIT_WIDTH-1] CoreOutput;
-     wire [0:INPUT_BIT_WIDTH-1] CoreStackFirst;
-     wire [0:INPUT_BIT_WIDTH-1] CoreStackSecond;
-     wire [0:STACK_ADDR_SIZE-1] CoreStackSize;
-     wire CoreError;
-	 reg CoreExecute;
-     wire CoreReady;
-     wire CoreStackEmpty;
+	reg [0:7] CoreInstruction;
+    reg [0:INPUT_BIT_WIDTH-1] CoreInput;
+    wire [0:INPUT_BIT_WIDTH-1] CoreOutput;
+    wire [0:INPUT_BIT_WIDTH-1] CoreStackFirst;
+    wire [0:INPUT_BIT_WIDTH-1] CoreStackSecond;
+    wire [0:STACK_ADDR_SIZE-1] CoreStackSize;
+    wire CoreError;
+	reg CoreExecute;
+    wire CoreReady;
+    wire CoreStackEmpty;
 	 
-     reg UartNotResetInput;
-     reg UartNotResetOutput;
+    reg UartNotResetInput;
+    reg UartNotResetOutput;
      
     UART #(
         .FREQ(100_000_000),
@@ -262,7 +262,7 @@ module MiniCalc2
             begin
                 if(CoreReady)
                     begin
-                        if(ExecuteUart) /* ExecuteUart */
+                        if(ExecuteUart)
                             begin
                                 State <= STATE_EXECUTE_END;
                                 ExecuteUart <= 1;
@@ -326,7 +326,7 @@ module MiniCalc2
                         casez(Switch[2:0])
                             3'b000:
                                 begin
-                                    // ADD
+                                    /* ADD */
                                     CoreInstruction <= 8'b00000100;
                                     CoreInput <= 0;
                                     CoreExecute <= 1;
@@ -337,7 +337,7 @@ module MiniCalc2
                                 end
                             3'b001:
                                 begin
-                                    // SUB
+                                    /* SUB */
                                     CoreInstruction <= 8'b00000101;
                                     CoreInput <= 0;
                                     CoreExecute <= 1;
@@ -348,7 +348,7 @@ module MiniCalc2
                                 end
                             3'b010:
                                 begin
-                                    // MUL
+                                    /* MUL */
                                     CoreInstruction <= 8'b00000110;
                                     CoreInput <= 0;
                                     CoreExecute <= 1;
@@ -359,7 +359,7 @@ module MiniCalc2
                                 end
                             3'b011:
                                 begin
-                                    // DIV
+                                    /* DIV */
                                     CoreInstruction <= 8'b00001000;
                                     CoreInput <= 0;
                                     CoreExecute <= 1;
@@ -370,7 +370,7 @@ module MiniCalc2
                                 end
                             3'b100:
                                 begin
-                                    // MOD
+                                    /* MOD */
                                     CoreInstruction <= 8'b00001010;
                                     CoreInput <= 0;
                                     CoreExecute <= 1;
@@ -381,7 +381,7 @@ module MiniCalc2
                                 end
                             3'b101:
                                 begin
-                                    // POP
+                                    /* POP */
                                     CoreInstruction <= 8'b00000010;
                                     CoreInput <= 0;
                                     CoreExecute <= 1;
@@ -392,7 +392,7 @@ module MiniCalc2
                                 end
                              3'b110:
                                 begin
-                                    // COPY
+                                    /* COPY */
                                     CoreInstruction <= 8'b00000011;
                                     CoreInput <= 0;
                                     CoreExecute <= 1;
@@ -403,7 +403,7 @@ module MiniCalc2
                                 end
                             3'b111:
                                 begin
-                                    // SWAP
+                                    /* SWAP */
                                     CoreInstruction <= 8'b00001001;
                                     CoreInput <= 0;
                                     CoreExecute <= 1;

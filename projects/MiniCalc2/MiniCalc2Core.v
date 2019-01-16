@@ -41,7 +41,7 @@ module MiniCalc2Core
 )
 (
     input Clk,
-	input [0:INSTR_BIT_WIDTH-1] Instruction,
+    input [0:INSTR_BIT_WIDTH-1] Instruction,
     input [0:INPUT_BIT_WIDTH-1] InputA,
     output reg [0:INPUT_BIT_WIDTH-1] OutputA = 0,
     output reg [0:INPUT_BIT_WIDTH-1] StackFirst = 0,
@@ -505,7 +505,7 @@ module MiniCalc2Core
                         end
                 endcase
             end
-	end 
+    end 
     
 endmodule
 
