@@ -1,5 +1,10 @@
 `timescale 1ns / 1ps
+`include "../../utils/test.v"
 `include "RegMux4.v"
+
+`define do_select(num, value) \
+        #50 Select = num; \
+        `assert(Output, value);
 
 /*
  * Piotr Styczyński @styczynski
@@ -10,7 +15,7 @@
  *
  * MIT License
  */
-module TestRegMux
+module TestRegMux4
 #(
 	parameter INPUT_BIT_WIDTH = 8,
     parameter BUS_WIDTH = 2
@@ -36,34 +41,28 @@ module TestRegMux
         .Output(Output)
 	);
 
-	initial begin
+	`startTest("RegMux4")
 		// Initialize Inputs
 		InputA = 0;
         InputB = 0;
         InputC = 0;
         InputD = 0;
         Select = 0;
-
-		// Wait 100 ns for global reset to finish
 		#100;
         
-		InputA = 42;
-        InputB = 15;
-        InputC = 2;
-        InputD = 0;
-        Select = 0;
+        `describe("Test small const inputs switching");
+            InputA = 42;
+            InputB = 15;
+            InputC = 2;
+            InputD = 0;
+            Select = 0;
         
-        #50 Select = 1;
-        #50 Select = 2;
-        #50 Select = 3;
-        #50 Select = 2;
-        #50 Select = 0;
-        
-	end
-
-    initial begin
-		$monitor("InputA=%d, InputB=%d, InputC=%d, InputD=%d, Select=%d, Output=%d", InputA, InputB, InputC, InputD, Select, Output);
-	end
+            `do_select(0, 42);
+            `do_select(1, 15);
+            `do_select(2, 2);
+            `do_select(3, 0);
+            
+	`endTest
       
 endmodule
 

@@ -1,14 +1,20 @@
 `timescale 1ns / 1ps
+`include "../../utils/test.v"
 `include "./Bin2BCDConverter_4.v"
 
-`define assert(label, signal, value) \
-        #1; \
-        if (signal !== value) begin \
-            $display("ASSERTION FAILED in %m:"); \
-            $display("  [%s] signal != value", label); \
-            $finish; \
-        end
-
+`define assertDigitsValue(d0, d1, d2, d3) \
+        `assert(Digit3, d3); \
+        `assert(Digit2, d2); \
+        `assert(Digit1, d1); \
+        `assert(Digit0, d0);
+        
+`define assertDigits(value) \
+       `assertDigitsValue((value/1000)%10, (value/100)%10, (value/10)%10, (value)%10);
+        
+`define assertSetCheckDigit(value) \
+        Input = value; #2; \
+        `assertDigits(value);
+    
 /*
  * Piotr Styczyński @styczynski
  * Verilog Components Library
@@ -36,66 +42,35 @@ module TestBin2BCDConverter_4
         .INPUT_BIT_WIDTH(INPUT_BIT_WIDTH)
     ) uut(
 		.Input(Input),
-        .Digit2(Digit2),
-        .Digit1(Digit1),
-        .Digit0(Digit0)
+        .Digit3(Digit0),
+        .Digit2(Digit1),
+        .Digit1(Digit2),
+        .Digit0(Digit3)
 	);
 
-	initial begin
+	`startTest("Bin2BCDConverter_4")
 		// Initialize Inputs
-		
         #100;
         
-        Input = 0;
-        #2;
+        `describe("Test Input = 0");
+            `assertSetCheckDigit(0);
         
-        `assert("Input = 0", Digit3, 0);
-        `assert("Input = 0", Digit2, 0);
-        `assert("Input = 0", Digit1, 0);
-        `assert("Input = 0", Digit0, 0);
+        `describe("Test Input = 10");
+            `assertSetCheckDigit(10);
         
-        Input = 10;
-        #2;
+        `describe("Test Input = 142");
+            `assertSetCheckDigit(142);
+            
+        `describe("Test Input = 89");
+            `assertSetCheckDigit(89);
         
-        `assert("Input = 10", Digit3, 0);
-        `assert("Input = 10", Digit2, 0);
-        `assert("Input = 10", Digit1, 1);
-        `assert("Input = 10", Digit0, 0);
+        `describe("Test Input = 33");
+            `assertSetCheckDigit(33);
         
-        Input = 142;
-        #2;
+        `describe("Test Input = 599");
+            `assertSetCheckDigit(599);
         
-        `assert("Input = 142", Digit3, 0);
-        `assert("Input = 142", Digit2, 1);
-        `assert("Input = 142", Digit1, 4);
-        `assert("Input = 142", Digit0, 2);
-        
-        Input = 89;
-        #2;
-        
-        `assert("Input = 89", Digit3, 0);
-        `assert("Input = 89", Digit2, 0);
-        `assert("Input = 89", Digit1, 8);
-        `assert("Input = 89", Digit0, 9);
-        
-        Input = 33;
-        #2;
-        
-        `assert("Input = 33", Digit3, 0);
-        `assert("Input = 33", Digit2, 0);
-        `assert("Input = 33", Digit1, 3);
-        `assert("Input = 33", Digit0, 3);
-        
-        Input = 599;
-        #2;
-        
-        `assert("Input = 599", Digit3, 0);
-        `assert("Input = 599", Digit2, 5);
-        `assert("Input = 599", Digit1, 9);
-        `assert("Input = 599", Digit0, 9);
-        
-        $finish;
-	end
+    `endTest
       
 endmodule
 

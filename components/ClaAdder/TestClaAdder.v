@@ -1,4 +1,10 @@
 `timescale 1ns / 1ps
+`include "../../utils/test.v"
+`include "ClaAdder.v"
+
+`define assertCheckSum(a, b) \
+        InputA = a; InputB = b; #100; \
+        `assert(Sum, a+b);
 
 /*
  * Piotr Styczyński @styczynski
@@ -29,28 +35,23 @@ module TestClaAdder;
 		.OutputCarry(OutputCarry)
 	);
 
-	initial begin
+	`startTest("ClaAdder")
 		// Initialize Inputs
 		InputA = 0;
 		InputB = 0;
 		InputCarry = 0;
-
-		// Wait 100 ns for global reset to finish
 		#100;
         
-		InputA = 5;
-		InputB = 12;
-		
-		#100;
-		
-		  
-		// Add stimulus here
-
-	end
-	
-	initial begin
-		$monitor("Input=%d + %d [carry=%d], Output=%d [carry=%d]", InputA, InputB, InputCarry, Sum, OutputCarry);
-	end
+        `describe("Add 5 + 12");
+            `assertCheckSum(5, 12);
+            
+        `describe("Add 0 + 0");
+            `assertCheckSum(0, 0);
+        
+        `describe("Add 128 + 127");
+            `assertCheckSum(128, 127);
+        
+	`endTest
       
 endmodule
 

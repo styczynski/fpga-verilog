@@ -1,5 +1,14 @@
 `timescale 1ns / 1ps
+`include "../../utils/test.v"
 `include "UnsignDividerComb.v"
+
+`define do_div(a, b) \
+        #200; \
+        Dividend = a; \
+        Divider = b; \
+        #200; \
+        `assert(Quotient, a/b); \
+        `assert(Remainder, a%b);
 
 /*
  * Piotr Styczyński @styczynski
@@ -16,9 +25,9 @@ module TestUnsignDividerComb
 );
 
 	// Inputs
+    `defClock(Clk, 2);
 	reg [INPUT_BIT_WIDTH-1:0] Dividend;
 	reg [INPUT_BIT_WIDTH-1:0] Divider;
-	reg Clk;
 
 	// Outputs
 	wire [INPUT_BIT_WIDTH-1:0] Quotient;
@@ -33,27 +42,28 @@ module TestUnsignDividerComb
 		.Clk(Clk)
 	);
 
-	initial begin
-		// Initialize Inputs
-		Dividend = 13;
-		Divider = 2;
+    `startTest("UnsignDividerComb");
+        // Initialize Inputs
+		Dividend = 0;
+		Divider = 0;
 		Clk = 0;
-
-		// Wait 100 ns for global reset to finish
 		#100;
+    
+        `describe("Test 13 / 2");
+            `do_div(13, 2);
+            
+        `describe("Test 69 / 42");
+            `do_div(69, 42);
+    
+        `describe("Test 255 / 5");
+            `do_div(255, 5);
         
-		#500;
-		// Add stimulus here
-
-	end
-
-   initial begin
-		$monitor("Clk=%d, Dividend=%d, Divider=%d, Quotient=%d, Remainder=%d", Clk, Dividend, Divider, Quotient, Remainder);
-	end
-      
-	always begin
-		   Clk = #50 ~Clk;
-	end
+        `describe("Test 77 / 1");
+            `do_div(77, 1);
+            
+         //`describe("Test 150 / 150");
+         //  `do_div(150, 150);
+    `endTest
       
 endmodule
 

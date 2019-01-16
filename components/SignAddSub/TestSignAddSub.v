@@ -1,7 +1,26 @@
 `timescale 1ns / 1ps
-`ifndef LIB_STYCZYNSKI_TEST_SIGN_ADD_SUB_V
-`define LIB_STYCZYNSKI_TEST_SIGN_ADD_SUB_V
+`include "../../utils/test.v"
+`include "SignAddSub.v"
 
+`define do_sub(a, b) \
+        AddSubMode = 0; \
+        InputA = a; \
+        InputB = b; \
+        #2; \
+        `assert(Result, a-b);
+        
+`define do_add(a, b) \
+        AddSubMode = 1; \
+        InputA = a; \
+        InputB = b; \
+        #2; \
+        `assert(Result, a+b);
+
+`define do_add_sub(a, b) \
+        `do_add(a, b); \
+        `do_sub(a, b);
+
+        
 /*
  * Piotr Styczyński @styczynski
  * Verilog Components Library
@@ -17,17 +36,16 @@ module TestSignAddSub
 );
 
 	// Inputs
+    `defClock(Clk, 2);
 	reg signed [INPUT_BIT_WIDTH-1:0] InputA;
 	reg signed [INPUT_BIT_WIDTH-1:0] InputB;
 	reg AddSubMode;
-	reg Clk;
 
 	// Outputs
 	wire [INPUT_BIT_WIDTH-1:0] Result;
 
 	// Instantiate the Unit Under Test (UUT)
-	SignDivider uut (
-		.Quotient(Quotient),
+	SignAddSub uut (
 		.AddSubMode(AddSubMode),
 		.InputA(InputA),
 		.InputB(InputB),
@@ -35,29 +53,24 @@ module TestSignAddSub
         .Result(Result)
 	);
 
-	initial begin
+	`startTest("SignAddSub");
 		// Initialize Inputs
 		AddSubMode = 0;
-        InputA = 20;
-        InputB = 8;
+        InputA = 0;
+        InputB = 0;
 		Clk = 0;
-
-		// Wait 100 ns for global reset to finish
 		#100;
         
-		#500;
-		// Add stimulus here
+        `describe("Test 20 +/- 8");
+            `do_add_sub(20, 8);
+            
+        `describe("Test 100 +/- 100");
+            `do_add_sub(100, 100);
+            
+        `describe("Test 0 +/- 0");
+            `do_add_sub(0, 0);
 
-	end
+	`endTest
 
-   initial begin
-		$monitor("Clk=%d, AddSubMode=%d, InputA=%d, InputB=%d", Clk, AddSubMode, InputA, InputB);
-	end
-      
-	always begin
-		   Clk = #10 ~Clk;
-	end
       
 endmodule
-
-`endif
