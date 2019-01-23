@@ -1,0 +1,17 @@
+#!/bin/node
+
+const client = require('../client.js');
+/*let commands = [];
+for(let i=0;i<2500;++i) {
+    commands.push({
+        call: 'paint',
+        x: 0,
+        y: i
+    });
+}*/
+
+client.call({
+    call: 'xpaint',
+    x: 0,
+    y: 0
+});

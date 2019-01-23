@@ -10,12 +10,12 @@ module UartTx
     parameter STATE_TX_STOP0 = 3'd3,
     parameter STATE_TX_STOP1 = 3'd4
 ) (
-    input Reset,
-    input Clk,
-    output TxWire,
-    input [7:0] TxDataInput,
-    input TxEnable,
-    output TxReady
+    input wire Reset,
+    input wire Clk,
+    output wire TxWire,
+    input wire [7:0] TxDataInput,
+    input wire TxEnable,
+    output wire TxReady
 );
 
     
@@ -23,7 +23,7 @@ module UartTx
     reg TxSamplerReset = 1'b0;
     wire TxSamplerClockEnable;
     
-    FreqDivider #(
+    /*FreqDivider #(
         .FREQUENCY_IN(CLOCK_FREQUENCY),
         .FREQUENCY_OUT(CLOCK_FREQUENCY / ((CLOCK_FREQUENCY / (BAUD_RATE * 3) / 2) * 2) / 3),
         .INITIAL_CLOCK_PHASE(1'b0)
@@ -31,6 +31,21 @@ module UartTx
         .Reset(TxSamplerReset),
         .Clk(Clk),
         .ClkOutput(TxSamplerClockEnable)
+    );*/
+    
+    ClockDiv #(
+        .FREQ_I(CLOCK_FREQUENCY),
+        // Make sure TX baud is exactly the same as RX baud, even after all the rounding that
+        // might have happened inside rx_sampler_clk_div, by replicating it here.
+        // Otherwise, anything that sends an octet every time it receives an octet will
+        // eventually catch a frame error.
+        .FREQ_O(CLOCK_FREQUENCY / ((CLOCK_FREQUENCY / (BAUD_RATE * 3) / 2) * 2) / 3),
+        .PHASE(1'b0),
+        .MAX_PPM(50_000)
+    ) tx_sampler_clk_div (
+        .reset(TxSamplerReset),
+        .clk_i(Clk),
+        .clk_o(TxSamplerClockEnable)
     );
 
     // TX strobe generator

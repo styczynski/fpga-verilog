@@ -1,39 +1,50 @@
 `timescale 1ns / 1ps
+`default_nettype none
 `ifndef LIB_STYCZYNSKI_FREQ_DIVIDER_V
 `define LIB_STYCZYNSKI_FREQ_DIVIDER_V
 
 module FreqDivider #(
         parameter FREQUENCY_IN = 2,
         parameter FREQUENCY_OUT = 1,
-        parameter INITIAL_CLOCK_PHASE = 1'b1
+        parameter MAX_PPM = 1_000_000
     ) (
-        input  Reset,
-        input  Clk,
-        output reg ClkOutput = INITIAL_CLOCK_PHASE
+        input wire Reset,
+        input wire Clk,
+        output reg ClkOutput
     );
 
-    /* Calculate counter width for desired frequencies */
-    localparam COUNTER_PARAM = FREQUENCY_IN / FREQUENCY_OUT / 2 - 1;
+    // This calculation always rounds frequency up.
+    localparam COUNTER_VALUE = FREQUENCY_IN / FREQUENCY_OUT / 2 - 1;
+    localparam ACTUAL_FREQUENCY = FREQUENCY_IN / ((COUNTER_VALUE + 1) * 2);
+    localparam PPM = 64'd1_000_000 * (ACTUAL_FREQUENCY - FREQUENCY_OUT) / FREQUENCY_OUT;
 
-    reg [$clog2(COUNTER_PARAM):0] Counter = 0;
+    generate
+        if(COUNTER_VALUE < 0)
+            _ERROR_FREQ_TOO_HIGH_ error();
+        if(PPM > MAX_PPM)
+            _ERROR_FREQ_DEVIATION_TOO_HIGH_ error();
+    endgenerate
     
-    always @(posedge Clk or negedge Reset)
+    reg [$clog2(COUNTER_VALUE)+1:0] Counter;
+    
+    always @(posedge Clk)
     begin
         if(!Reset)
             begin
                 Counter <= 0;
-                ClkOutput <= INITIAL_CLOCK_PHASE;
+                ClkOutput <= 0;
             end
         else
             begin
-                if(Counter == 0)
+                if(Counter >= COUNTER_VALUE)
                     begin
-                        ClkOutput <= ~ClkOutput;
-                        Counter <= COUNTER_PARAM;
+                        ClkOutput <= 1;
+                        Counter <= 0;
                     end
                 else
                     begin
-                        Counter <= Counter - 1;
+                        ClkOutput <= 0;
+                        Counter <= Counter + 1;
                     end
         end
     end

@@ -1,0 +1,4 @@
+#!/bin/node
+
+const client = require('../client.js');
+client.call('echo', { data: parseInt(process.argv[2]) });

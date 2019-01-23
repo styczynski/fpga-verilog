@@ -75,11 +75,11 @@ NET "Switch[7]"                   LOC = P26      | IOSTANDARD = LVCMOS33 | DRIVE
 #NET "IO_P1[29]"                  LOC = P142     | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;    # IO_L2P_0	   		            Sch = GPIO-P5
 #NET "IO_P1[30]"                  LOC = P141     | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;    # IO_L2N_0           		    Sch = GPIO-N5
 #NET "IO_P1[31]"                  LOC = P140     | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;    # IO_L3P_0	   		            Sch = GPIO-P4
-#NET "IO_P1[32]"                  LOC = P139     | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;    # IO_L3N_0 	   		            Sch = GPIO-N4
-#NET "IO_P1[33]"                  LOC = P138     | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;    # IO_L4P_0	   		            Sch = GPIO-P3
-#NET "IO_P1[34]"                  LOC = P137     | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;    # IO_L4N_0   	   		        Sch = GPIO-N3
-#NET "IO_P1[35]"                  LOC = P134     | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;    # IO_L34P_GCLK19_0  	        Sch = GPIO-P2
-#NET "IO_P1[36]"                  LOC = P133     | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST ;    # IO_L34N_GCLK18_0   		    Sch = GPIO-N2
+NET "VGA_B"                  LOC = P139     | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST | PULLUP;    # IO_L3N_0 	   		            Sch = GPIO-N4
+NET "VGA_G"                  LOC = P138     | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST | PULLUP ;    # IO_L4P_0	   		            Sch = GPIO-P3
+NET "VGA_R"                  LOC = P137     | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST | PULLUP ;    # IO_L4N_0   	   		        Sch = GPIO-N3
+NET "VGA_VSYNC"                  LOC = P134     | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST | PULLUP ;    # IO_L34P_GCLK19_0  	        Sch = GPIO-P2
+NET "VGA_HSYNC"                  LOC = P133     | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST | PULLUP ;    # IO_L34N_GCLK18_0   		    Sch = GPIO-N2
 NET "IO_TXD"                      LOC = P132     | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST | PULLUP;    # IO_L35P_GCLK17_0   	        Sch = GPIO-P1
 NET "IO_RXD"                      LOC = P131     | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = FAST | PULLUP;    # IO_L35N_GCLK16_0    	        Sch = GPIO-N1
 ###################################################################################################################################################
