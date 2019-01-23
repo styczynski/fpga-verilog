@@ -3,6 +3,8 @@
 
 localhost:3000/paint/50/50
 localhost:3000/stream
+localhost:3000/load/1/44
+localhost:3000/clear
 
 */
 // Hello
@@ -25,7 +27,7 @@ let statScheduledCommandsCnt = 0;
 let statExecutedCommandsCnt = 0;
 
 const port = new SerialPort('COM10', {
-    baudRate: 576000
+    baudRate: 230400
 });
 
 port.on('data', function(data) {
@@ -33,6 +35,23 @@ port.on('data', function(data) {
     //logger.log('READ: '+inputArr.join(' ').toString());
     readData = readData.concat(inputArr);
 });
+
+let taskQueue = [];
+let taskQueueBusy = false;
+let runTask = (fn) => {
+    taskQueue.push(() => {
+        taskQueueBusy = true;
+        fn();
+        taskQueueBusy = false;
+    });
+};
+
+setInterval(() => {
+    if(!taskQueueBusy && taskQueue.length > 0) {
+        taskQueue[0]();
+        taskQueue = taskQueue.splice(1);
+    }
+}, 1);
 
 const setStackCell = (index, value, handler) => {
     //logger.log('STUPD: '+index+', '+value);
@@ -121,14 +140,14 @@ const waitForBytesHandler = (port, bytesCount, handler, retryFn, dataHandler) =>
                     bytesLeft -= partialResult.length;
                     result = result.concat(partialResult);
                 }
-                if(retryNo > 5) {
+                if(retryNo > 3) {
                     retryFn();
                     return;
                 }
-                setTimeout(() => pollRead(retryNo+1), 0);
+                setTimeout(() => pollRead(retryNo+1), 1);
             };
-            pollRead(0);
-            //setTimeout(() => pollRead(0), 0);
+            //pollRead(0);
+            setTimeout(() => pollRead(0), 0);
         }
     };
 };
@@ -162,33 +181,56 @@ const getFlagsDescrObj = (flags) => {
 //const paintPixelHelper = (x, y, col) => [ 2, col, ...numToBytes(400*y+x, 3) ];
 //131072*
 const paintPixelHelper = (x, y, col) => [ ...numToBytes((1048576*2) + (131072*col) + (400*y+x), 3) ];
+const loadRegHelper = (reg, value) => [ ...numToBytes((1048576*5) + (131072*reg) + (value), 3) ];
+
 
 const COMMANDS = {
     echo: ({ port, handler, data }) => {
         const d = [ ...numToBytes((1048576*1) + data, 3) ];
-        logger.log('SEND '+d.join(' '));
+        //logger.log('SEND '+d.join(' '));
         sendDataWithRetry(port, d, handler);
     },
+    load: ({ port, handler, reg, value }) => {
+        sendDataWithRetry(port, loadRegHelper(reg, value), handler);
+    },
+    multipaint: ({ port, handler, points }) => {
+        sendCommands(port, points.map((p) => {
+            return {
+                call: 'paint',
+                ...p
+            };
+        }), handler);
+    },
+    rect: ({ port, handler, color, x1, y1, x2, y2 }) => {
+        sendDataWithRetry(port, loadRegHelper(0, x1), () => {
+            sendDataWithRetry(port, loadRegHelper(1, y1), () => {
+                sendDataWithRetry(port, loadRegHelper(2, x2), () => {
+                    sendDataWithRetry(port, loadRegHelper(3, y2), () => {
+                        sendDataWithRetry(port, numToBytes((1048576*6) + (131072*color), 3), handler);
+                    });
+                });
+            });
+        });
+    },
     stream: ({ port, handler }) => {
-        port.write([255, 255, 255, ...numToBytes((1048576*3), 3)], () => {
-            let commands = [[...numToBytes((1048576*3), 3)]];
-            for(let i=0;i<120000-1;++i) {
+        sendDataWithRetry(port, [255, 255, 255, ...numToBytes((1048576*3), 3)], () => {
+            let commands = [];
+            for(let i=0;i<120000;++i) {
                 const x = parseInt(i%400);
                 const y = parseInt(i/400);
-                const col = (y == 100+parseInt(Math.sin(x/20)*50))?(1):(0);
-                commands.push([
+                const col = (x%2==0 || y%2==0)?(4):(5);//(y == 100+parseInt(Math.sin(x/20)*50))?(3):(1);
+                ([
                     ...numToBytes((32*col), 1)
-                ]);
+                ]).forEach((i) => commands.push(i));
             }
-            commands.map((i) => port.write(i, handler));
+            port.write(commands, handler);
         });
     },
     clear: ({ port, handler}) => {
         sendDataWithRetry(port, [ ...numToBytes((1048576*4) + (131072*0), 3) ], handler)
     },
-    paint: ({ port, handler, x, y }) => {
-        //const d = [ 2, 255, ...numToBytes(y*400+x, 3) ];
-        const d = paintPixelHelper(x, y, 3);
+    paint: ({ port, handler, color, x, y }) => {
+        const d = paintPixelHelper(x, y, color);
         logger.log('SEND '+d.join(' '));
         sendDataWithRetry(port, d, handler)
     },
@@ -215,7 +257,7 @@ const defaultHandler = (err) => {
   if(err) {
     return logger.log('ERROR: '+err.message.toString());
   }
-  logger.log('SEND');
+  //logger.log('SEND');
 };
 
 const sendCommands = (port, commands, handler) => {
@@ -235,14 +277,7 @@ const sendCommands = (port, commands, handler) => {
                 sendCommandI(index+1);
             }));
             
-            /*
-            setTimeout(() => {
-                port.write(commands[index], thenHandler(handler, () => {
-                    statExecutedCommandsCnt += 1;
-                    sendCommandI(index+1);
-                }));
-            }, 0);
-            */
+            
         } else if(commands[index].wait !== null && typeof commands[index].wait !== 'undefined') {
             setTimeout(() => {
                 COMMANDS[commands[index].call](Object.assign({}, commands[index], {
@@ -270,6 +305,7 @@ const sendCommands = (port, commands, handler) => {
 const app = express();
 
 app.use(express.json());
+app.use(express.static('app'));
 
 let reqSecNewResult = 0;
 let reqSecData = [];
@@ -293,27 +329,64 @@ const executeCommand = (params, response) => {
 };
 
 app.post('/execute', function(req, res) {
-   executeCommand((req.body || {}).commands || [], res);
+   runTask(() => {
+       logger.log('EXECUTE len():='+(((req.body || {}).commands || []).length));
+       executeCommand((req.body || {}).commands || [], res);
+   });
 });
 
 app.get('/clear', function(req, res) {
-   executeCommand({ call: 'clear' }, res);
+   runTask(() => {
+       executeCommand({ call: 'clear' }, res);
+   });
 });
 
 app.get('/stream', function(req, res) {
-   executeCommand({ call: 'stream' }, res);
+   runTask(() => {
+       executeCommand({ call: 'stream' }, res);
+   });
+});
+
+app.get('/rect/:color/:x1/:y1/:x2/:y2', function(req, res) {
+   runTask(() => {
+       executeCommand({
+          call: 'rect',
+          color: parseInt(req.params.color),
+          x1: parseInt(req.params.x1),
+          y1: parseInt(req.params.y1),
+          x2: parseInt(req.params.x2),
+          y2: parseInt(req.params.y2)
+       }, res);
+   });
+});
+
+app.get('/load/:reg/:value', function(req, res) {
+   runTask(() => {
+       executeCommand({ call: 'load', reg: parseInt(req.params.reg), value: parseInt(req.params.value) }, res);
+   });
 });
 
 app.get('/echo/:data', function(req, res) {
-   executeCommand({ call: 'echo', data: parseInt(req.params.data) }, res);
+   runTask(() => {
+        executeCommand({ call: 'echo', data: parseInt(req.params.data) }, res);
+   });
 });
 
-app.get('/paint/:x/:y', function(req, res) {
-   executeCommand({ call: 'paint', x: parseInt(req.params.x), y: parseInt(req.params.y) }, res);
+app.get('/paint/:color/:x/:y', function(req, res) {
+   runTask(() => {
+       executeCommand({
+           call: 'paint',
+           x: parseInt(req.params.x),
+           y: parseInt(req.params.y),
+           color: parseInt(req.params.color)
+       }, res);
+   });
 });
 
 app.get('/xpaint', function(req, res) {
-   executeCommand({ call: 'xpaint', x: 0, y: 0 }, res);
+   runTask(() => {
+       executeCommand({ call: 'xpaint', x: 0, y: 0 }, res);
+   });
 });
 
 /*setInterval(() => {

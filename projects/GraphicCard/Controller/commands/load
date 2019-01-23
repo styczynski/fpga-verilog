@@ -1,0 +1,4 @@
+#!/bin/node
+
+const client = require('../client.js');
+client.call('load', { reg: parseInt(process.argv[2]), value: parseInt(process.argv[3]) });

@@ -6,14 +6,18 @@ const callRemote = (commandName, args) => {
       method: 'GET'
     };
     
-    if(commandName === 'stream') {
+    if(commandName === 'rect') {
+        options.uri = `${options.uri}/rect/${args.color}/${args.x1}/${args.y1}/${args.x2}/${args.y2}`;
+    } else if(commandName === 'load') {
+        options.uri = `${options.uri}/load/${args.reg}/${args.value}`;
+    } else if(commandName === 'stream') {
         options.uri = `${options.uri}/stream`;
     } else if(commandName === 'clear') {
         options.uri = `${options.uri}/clear`;
     } else if(commandName === 'echo') {
         options.uri = `${options.uri}/echo/${args.data}`;
     } else if(commandName === 'paint') {
-        options.uri = `${options.uri}/paint/${args.x}/${args.y}`;
+        options.uri = `${options.uri}/paint/${args.color}/${args.x}/${args.y}`;
     } else if(commandName.constructor === Array) {
         options.uri = `${options.uri}/execute`;
         options.method = 'POST';

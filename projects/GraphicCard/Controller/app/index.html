@@ -1,0 +1,196 @@
+
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <style>
+      body {
+        margin: 0px;
+        padding: 0px;
+      }
+      #paint {
+        width: 100vw;
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+  	<div id="paint">
+  		<canvas id="myCanvas"></canvas>
+	</div>
+    <script>
+    
+
+function httpGetAsync(method, payload, theUrl, callback)
+{
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() { 
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+            callback(xmlHttp.responseText);
+    }
+    xmlHttp.open(method, theUrl, true); // true for asynchronous
+    xmlHttp.setRequestHeader("Content-Type", "application/json");
+    xmlHttp.send((payload)?(JSON.stringify(payload)):(null));
+}
+
+const callRemote = (commandName, args, callback) => {
+    const options = {
+      uri: 'http://localhost:3000',
+      method: 'GET'
+    };
+    
+    if(commandName === 'rect') {
+        options.uri = `${options.uri}/rect/${args.color}/${args.x1}/${args.y1}/${args.x2}/${args.y2}`;
+    } else if(commandName === 'load') {
+        options.uri = `${options.uri}/load/${args.reg}/${args.value}`;
+    } else if(commandName === 'stream') {
+        options.uri = `${options.uri}/stream`;
+    } else if(commandName === 'clear') {
+        options.uri = `${options.uri}/clear`;
+    } else if(commandName === 'echo') {
+        options.uri = `${options.uri}/echo/${args.data}`;
+    } else if(commandName === 'paint') {
+        options.uri = `${options.uri}/paint/${args.color}/${args.x}/${args.y}`;
+    } else if(commandName.constructor === Array) {
+        options.uri = `${options.uri}/execute`;
+        options.method = 'POST';
+        options.json = {
+            commands: commandName.map((i) => Object.assign({}, i))
+        };
+        if(options.json.commands.length <= 0) {
+            callback();
+            return;
+        }
+        //console.log(options);
+    } else {
+        options.uri = `${options.uri}/${commandName}`;
+    }
+
+    httpGetAsync(options.method, options.json || null, options.uri, callback);
+};
+
+const client = {
+    call: callRemote
+};
+
+client.call('clear', {}, () => {});
+    
+var canvas = document.getElementById('myCanvas');
+var ctx = canvas.getContext('2d');
+ 
+var painting = document.getElementById('paint');
+var paint_style = getComputedStyle(painting);
+canvas.width = parseInt(paint_style.getPropertyValue('width'));
+canvas.height = parseInt(paint_style.getPropertyValue('height'));
+
+var mouse = {x: 0, y: 0};
+ 
+canvas.addEventListener('mousemove', function(e) {
+  mouse.x = e.pageX - this.offsetLeft;
+  mouse.y = e.pageY - this.offsetTop;
+}, false);
+
+ctx.lineWidth = 3;
+ctx.lineJoin = 'round';
+ctx.lineCap = 'round';
+ctx.strokeStyle = '#00CC99';
+ 
+let lastPoint = {x:0, y:0};
+ 
+canvas.addEventListener('mousedown', function(e) {
+    lastPoint = {x: mouse.x, y: mouse.y};
+ 
+    canvas.addEventListener('mousemove', onPaint, false);
+}, false);
+ 
+canvas.addEventListener('mouseup', function() {
+    canvas.removeEventListener('mousemove', onPaint, false);
+}, false);
+
+let pixelBuffer = [];
+function putPixels(points, callback) {
+    const r = 0;
+    const g = 255;
+    const b = 0;
+    const a = 255;
+    
+    let uniquePoints = [];
+    let lastPoint = null;
+    points = points.filter((p) => {
+        let take = (lastPoint === null || lastPoint.x !== p.x || lastPoint.y !== p.y);
+        if(take) {
+            lastPoint = p;
+        }
+        return take;
+    });
+    
+    /*client.call('paint', {
+        color: parseInt(2),
+        x: parseInt(x),
+        y: parseInt(y)
+    }, () => {
+        ctx.fillStyle = "rgba("+r+","+g+","+b+","+(a/255)+")";
+        ctx.fillRect( x/400*canvas.width, y/300*canvas.height, 1, 1 );
+        callback();
+    });*/
+    
+    pixelBuffer = pixelBuffer.concat(points);
+    if(false && pixelBuffer.length < 30) {
+        // Do nothing
+    } else {
+        let pixelBufferToSend = pixelBuffer;
+        pixelBuffer = [];
+        client.call(pixelBufferToSend.map((p) => {
+            return Object.assign({}, p, {
+                call: 'paint'
+            });
+        }), {}, () => {
+            pixelBufferToSend.forEach((p) => {
+                ctx.fillStyle = "rgba("+r+","+g+","+b+","+(a/255)+")";
+                ctx.fillRect( p.x/400*canvas.width, p.y/300*canvas.height, 5, 5 );
+            });
+            callback();
+        });
+    }
+}
+ 
+function manualLine(x1, y1, x2, y2, callback) {
+    const step = 0.5;
+    let alpha = (y2-y1)/(x2-x1);
+    let dir = (x2>=x1)?(step):(-step);
+    
+    let points = [];
+    let x = x1;
+    lastPoint = {x: x1, y: y1};
+    while(!(Math.abs(x-x2) <= Math.abs(dir*2))) {
+        const y = y1+(x-x1)*alpha;
+        lastPoint = {x: x, y: y};
+        points.push({
+            color: parseInt(2),
+            x: parseInt(x / canvas.width * 400),
+            y: parseInt(y / canvas.height * 300)
+        }); 
+        x+=dir;
+    }
+    
+    lastPoint = {x: x2, y: y2};
+    putPixels(points, callback);
+    
+};
+ 
+var onPaint = function() {
+     manualLine(lastPoint.x, lastPoint.y, mouse.x, mouse.y, () => {
+        
+     });
+     /*client.call('paint', {
+        color: parseInt(2),
+        x: parseInt(mouse.x / canvas.width * 400),
+        y: parseInt(mouse.y / canvas.height * 300)
+    }, () => {
+         ctx.lineTo(mouse.x, mouse.y);
+        ctx.stroke();
+    });*/
+};
+
+    </script>
+  </body>
+</html>            

@@ -1,0 +1,10 @@
+#!/bin/node
+
+const client = require('../client.js');
+client.call('rect', {
+    color: parseInt(process.argv[2]),
+    x1: parseInt(process.argv[3]),
+    y1: parseInt(process.argv[4]),
+    x2: parseInt(process.argv[5]),
+    y2: parseInt(process.argv[6])
+});

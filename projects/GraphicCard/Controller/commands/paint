@@ -1,4 +1,8 @@
 #!/bin/node
 
 const client = require('../client.js');
-client.call('paint', { x: parseInt(process.argv[2]), y: parseInt(process.argv[3]) });
+client.call('paint', {
+    color: parseInt(process.argv[2]),
+    x: parseInt(process.argv[3]),
+    y: parseInt(process.argv[4])
+});
