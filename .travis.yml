@@ -5,11 +5,12 @@ before_install:
   # Install Bison, Flex, CMAKE
   - sudo apt-get -qq install bison flex wget cmake
   # Install readline
-  - sudo apt-cache search readline
-  - sudo apt-get -qq install libreadline6 libreadline6–dev
+  - sudo apt-get -qq install lib32readline6 lib32readline6-dev
   # Install gperf
+  - sudo apt-cache search gperf
   - sudo apt-get -qq install gperf
   # Install autoconf
+  - sudo apt-cache search autoconf
   - sudo apt-get -qq install autoconf
   # Clone Icarus Verilog GIT repository
   - git clone https://github.com/steveicarus/iverilog.git
