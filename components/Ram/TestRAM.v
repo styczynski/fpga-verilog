@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 `include "../../utils/test.v"
-`include "RAM.v"
+`include "./RAM.v"
 
 `define do_write(addr, value) \
         Addr = addr; Write = 1; Input = value; #2;

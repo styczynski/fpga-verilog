@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 `include "../../utils/test.v"
-`include "RegMux4.v"
+`include "./RegMux4.v"
 
 `define do_select(num, value) \
         #50 Select = num; \

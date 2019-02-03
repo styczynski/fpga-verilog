@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 `include "../../utils/test.v"
-`include "Multiplier.v"
+`include "./Multiplier.v"
 
 
 /*

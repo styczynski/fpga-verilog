@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 `include "../../utils/test.v"
-`include "SignAddSub.v"
+`include "./SignAddSub.v"
 
 `define do_sub(a, b) \
         AddSubMode = 0; \

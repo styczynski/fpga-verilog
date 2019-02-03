@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 `include "../../utils/test.v"
-`include "MinMax.v"
+`include "./MinMax.v"
 
 /*
  * Piotr Styczyński @styczynski

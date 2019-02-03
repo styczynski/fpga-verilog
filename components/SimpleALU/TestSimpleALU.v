@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 `include "../../utils/test.v"
-`include "SimpleALU.v"
+`include "./SimpleALU.v"
 
 `define do_op(code, a, b, out) \
         wait(Ready == 1); \

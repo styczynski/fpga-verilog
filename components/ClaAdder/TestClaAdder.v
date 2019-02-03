@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 `include "../../utils/test.v"
-`include "ClaAdder.v"
+`include "./ClaAdder.v"
 
 `define assertCheckSum(a, b) \
         InputA = a; InputB = b; #100; \

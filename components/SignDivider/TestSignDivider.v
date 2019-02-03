@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 `include "../../utils/test.v"
-`include "SignDivider.v"
+`include "./SignDivider.v"
 
 `define do_div(a, b) \
         wait(Ready == 1); \
