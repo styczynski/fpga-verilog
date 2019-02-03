@@ -9,9 +9,9 @@ This is collection of my projects that was made as a part of Warsaw University F
 ## Projects layout
 
 * [MiniCalc](https://github.com/styczynski/fpga-verilog/tree/master/projects/MiniCalc) - very simple 4-bit push-button calculator
-* [MiniCalc2](https://github.com/styczynski/fpga-verilog/tree/master/projects/MiniCalc2) - simple (RPN)[https://en.wikipedia.org/wiki/Reverse_Polish_notation] stack-based calculator supporting UART and push-buttons actions (with node.js express server to remotely control chip via UART from PC)
+* [MiniCalc2](https://github.com/styczynski/fpga-verilog/tree/master/projects/MiniCalc2) - simple [RPN](https://en.wikipedia.org/wiki/Reverse_Polish_notation) stack-based calculator supporting [UART](https://en.wikipedia.org/wiki/Universal_asynchronous_receiver-transmitter) and push-buttons actions (with node.js express server to remotely control chip via UART from PC)
 * [Stopwatch](https://github.com/styczynski/fpga-verilog/tree/master/projects/Stopwatch) - basic stopwatch chip controlled via push-buttons (custom clock divider)
-* [GraphicCard](https://github.com/styczynski/fpga-verilog/tree/master/projects/GraphicCard) - VGA graphics card controlled via UART interface (with node.js express server to remotely draw pictures or render photos on the screen via help of PC)
+* [GraphicCard](https://github.com/styczynski/fpga-verilog/tree/master/projects/GraphicCard) - [VGA](https://en.wikipedia.org/wiki/Video_Graphics_Array) graphics card controlled via UART interface (with node.js express server to remotely draw pictures or render photos on the screen via help of PC)
 
 ## Behavioral testing
 
