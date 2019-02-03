@@ -2,19 +2,21 @@ dist: trusty
 language: cpp
 before_install:
   - sudo apt-get update -qq
+  - sudo apt-cache search iverilog
+  - sudo apt-cache search verilog
   # Install Bison, Flex, CMAKE
   - sudo apt-get -qq install bison flex wget cmake
   # Install readline
   - sudo apt-get -qq install lib32readline6 lib32readline6-dev
   # Install gperf
-  - sudo apt-cache search gperf
   - sudo apt-get -qq install gperf
   # Install autoconf
-  - sudo apt-cache search autoconf
   - sudo apt-get -qq install autoconf
   # Clone Icarus Verilog GIT repository
   - git clone https://github.com/steveicarus/iverilog.git
   # Build the IVerilog from sources
-  - cd iverilog && sh autoconf.sh && ./configure && make && make install
+  - cd iverilog && sh autoconf.sh && ./configure && make
+  # Install the built iverilog
+  - sudo make install
 script:
   - bash ./test.sh
