@@ -1,4 +1,4 @@
-# 3rd Assignment - Graphics card with hardware acceleration
+# 4th Assignment - Graphics card with hardware acceleration
 
 ## About
 
