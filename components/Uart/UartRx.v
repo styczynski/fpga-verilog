@@ -1,4 +1,3 @@
-`include "../FreqDivider/FreqDivider.v"
 `default_nettype none
 
 module ClockDiv #(

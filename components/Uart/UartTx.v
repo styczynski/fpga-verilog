@@ -1,5 +1,3 @@
-`include "../FreqDivider/FreqDivider.v"
-
 module UartTx
 #(
     parameter CLOCK_FREQUENCY  = 1_000_000,
