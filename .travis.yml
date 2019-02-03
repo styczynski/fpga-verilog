@@ -2,6 +2,6 @@ dist: trusty
 language: cpp
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-install iverilog
+  - sudo apt-get install iverilog
 script:
   - bash ./test.sh
