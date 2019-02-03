@@ -1,4 +1,4 @@
-# fpga-verilog
+# fpga-verilog [![Build Status](https://travis-ci.org/styczynski/fpga-verilog.svg?branch=master)](https://travis-ci.org/styczynski/fpga-verilog)
 
 ## About
 
