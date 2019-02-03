@@ -16,5 +16,6 @@ before_install:
   - cd iverilog && sh autoconf.sh && ./configure && make
   # Install the built iverilog
   - sudo make install
+  - cd ..
 script:
   - bash ./test.sh
