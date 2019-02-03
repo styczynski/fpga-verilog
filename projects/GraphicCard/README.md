@@ -2,6 +2,8 @@
 
 ## About
 
+![photo of card in action](https://raw.githubusercontent.com/styczynski/fpga-verilog/master/projects/GraphicCard/static/cat_screenshot.jpg)
+
 This project provides external very simple hardware-accelerated graphics card.
 The PC-card communication is implemented via UART interface.
 
@@ -76,6 +78,8 @@ You can invoke any command from the terminal typing:
   $ node paint 3 50 50
 ```
 
+![Command execution screenshot](https://raw.githubusercontent.com/styczynski/fpga-verilog/master/projects/GraphicCard/static/command_screenshot.png)
+
 The commands are places within the `commands/` directory (they are simple calls to the client-side helper code).
 
 The server also renders `http://localhost:3000/` page that has very basic user interface to paint you custom drawings (the pixel paint requrests are sent to the chip)
@@ -86,3 +90,9 @@ and to upload any custom image (it will be converted to the 3-bit color palette)
 The entire chip was written in Verilog. The entrypoint is the `GraphicCardImpl.v` file.
 
 It was tested on Xilinx Spartan-6 chip (code build using ISE suite).
+
+## More pictures
+
+**Example of custom image upload via http://localhost:3000/ page**
+
+![Example of custom image upload](https://raw.githubusercontent.com/styczynski/fpga-verilog/master/projects/GraphicCard/static/any_image_screenshot.jpg)
