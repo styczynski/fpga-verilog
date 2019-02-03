@@ -14,6 +14,17 @@
     </style>
   </head>
   <body>
+    <div>
+        <form action="/upload" method="post" enctype="multipart/form-data">
+         <div>
+           <label for="file">Choose file to upload</label>
+           <input name="foo" type="file" accept="image/png"/>
+         </div>
+         <div>
+           <button>Submit</button>
+         </div>
+        </form>
+    </div>  
   	<div id="paint">
   		<canvas id="myCanvas"></canvas>
 	</div>

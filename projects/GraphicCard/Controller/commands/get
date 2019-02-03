@@ -1,0 +1,7 @@
+#!/bin/node
+
+const client = require('../client.js');
+client.call('get', {
+    x: parseInt(process.argv[2]),
+    y: parseInt(process.argv[3])
+});

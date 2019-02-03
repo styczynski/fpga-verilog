@@ -38,14 +38,22 @@ module GraphicCard #(
      parameter STATE_EXECUTE_REGMUL_INIT = 13,
      parameter STATE_EXECUTE_REGMUL_WAIT = 14,
      parameter STATE_EXECUTE_FILL_POST = 15,
+     parameter STATE_EXECUTE_COPY = 16,
+     parameter STATE_EXECUTE_COPY_READ = 17,
+     parameter STATE_EXECUTE_COPY_WRITE = 18,
+     parameter STATE_EXECUTE_COPY_WAIT = 19,
+     parameter STATE_READ = 20,
      parameter INSTRUCTION_ECHO = 4'b0001,
      parameter INSTRUCTION_PUT = 4'b0010,
      parameter INSTRUCTION_STREAM = 4'b0011,
      parameter INSTRUCTION_CLEAR = 4'b0100,
-     parameter INSTRUCTION_LOAD = 4'b0101,
+     parameter INSTRUCTION_STORE = 4'b0101,
      parameter INSTRUCTION_FILL = 4'b0110,
+     parameter INSTRUCTION_COPY = 4'b0111,
+     parameter INSTRUCTION_GET = 4'b1000,
      parameter UART_CLK_TIMEOUT = 12_000_000, //25_000_000 najlepsze inne testowane: 8_000_000, 12_000_000
-     parameter UART_BAUD_RATE = 230400 //230400 > 57600 najlepsze testowane także: 500000, 230400
+     parameter UART_BAUD_RATE = 230400, //230400 > 57600 najlepsze testowane także: 500000, 230400
+     parameter UART_OK_CODE = 42
 )
 (
     input wire Clk,
@@ -75,6 +83,8 @@ module GraphicCard #(
     reg [16:0] RegisterE;
     reg [16:0] RegisterF;
     
+    reg CopyForwardMode;
+    
     reg [3:0] PColor;
     
     reg [16:0] PX1;
@@ -90,6 +100,13 @@ module GraphicCard #(
     
     reg [16:0] CX2;
     reg [16:0] CY2;
+    
+    reg [16:0] CX3;
+    reg [16:0] CY3;
+    
+    reg [16:0] CX4;
+    reg [16:0] CY4;
+    
     
     /*wire [31:0] RegisterAB;
     wire [31:0] RegisterCD;
@@ -248,11 +265,103 @@ module GraphicCard #(
         //LED <= State;
         
         //CounterValue <= UartInputBuffer[0];
-        if(State == STATE_WAIT_UART_OUTPUT)
+        if(State == STATE_READ)
+            begin
+                State <= STATE_UART_OUTPUT;
+                UartOutputData <= FrameBufferOutput;
+            end
+        else if(State == STATE_WAIT_UART_OUTPUT)
             begin
                 State <= STATE_UART_OUTPUT;
                 FrameBufferWrite <= 0;
                 FrameBufferInput <= 0;
+            end
+        else if(State == STATE_EXECUTE_COPY)
+            begin
+                State <= STATE_EXECUTE_REGMUL_INIT;
+                FutureState <= STATE_EXECUTE_COPY_READ;
+                
+                if(CopyForwardMode)
+                    begin
+                        PX1 <= PX1 + 1;
+                        if(PX1 >= CX2)
+                            begin
+                                PY1 <= PY1 + 1;
+                                PX1 <= CX1;
+                            end
+                            
+                        PX2 <= PX2 + 1;
+                        if(PX2 >= CX4)
+                            begin
+                                PY2 <= PY2 + 1;
+                                PX2 <= CX3;
+                            end
+                        
+                        if(PX1 >= CX2 && PY1 >= CY2)
+                            begin
+                                State <= STATE_WAIT_UART_OUTPUT;
+                                UartOutputData <= UART_OK_CODE;
+                            end
+                        if(PX2 >= CX4 && PY2 >= CY4)
+                            begin
+                                State <= STATE_WAIT_UART_OUTPUT;
+                                UartOutputData <= UART_OK_CODE;
+                            end
+                   end
+               else
+                   begin
+                   
+                        if(PX1 <= CX1 && PY1 <= CY1)
+                            begin
+                                State <= STATE_WAIT_UART_OUTPUT;
+                                UartOutputData <= UART_OK_CODE;
+                            end
+                        if(PX2 <= CX3 && PY2 <= CY3)
+                            begin
+                                State <= STATE_WAIT_UART_OUTPUT;
+                                UartOutputData <= UART_OK_CODE;
+                            end
+                   
+                        if(PX1 == CX1)
+                            begin
+                                PY1 <= PY1 - 1;
+                                PX1 <= CX2;
+                            end
+                        else
+                            begin
+                                PX1 <= PX1 - 1;
+                            end
+                            
+                        if(PX2 == CX3)
+                            begin
+                                PY2 <= PY2 - 1;
+                                PX2 <= CX4;
+                            end
+                        else
+                            begin
+                                PX2 <= PX2 - 1;
+                            end
+                        
+                   end
+            end
+        else if(State == STATE_EXECUTE_COPY_READ)
+            begin
+                State <= STATE_EXECUTE_COPY_WAIT;
+                FrameBufferWrite <= 0;
+                FrameBufferAddr <= EA1[16:0];
+                FrameBufferInput <= 0;
+            end
+        else if(State == STATE_EXECUTE_COPY_WAIT)
+            begin
+                State <= STATE_EXECUTE_COPY_WRITE;
+            end
+        else if(State == STATE_EXECUTE_COPY_WRITE)
+            begin
+                State <= STATE_WRITE;
+                FutureState <= STATE_EXECUTE_COPY;
+                FrameBufferWrite <= 1;
+                FrameBufferAddr <= EA2[16:0];
+                FrameBufferInput <= FrameBufferOutput;
             end
         else if(State == STATE_EXECUTE_FILL_POST)
             begin
@@ -277,6 +386,7 @@ module GraphicCard #(
                 if(PX1 >= CX2 && PY1 >= CY2)
                     begin
                         State <= STATE_WAIT_UART_OUTPUT;
+                        UartOutputData <= UART_OK_CODE;
                     end
                    
                 
@@ -347,6 +457,7 @@ module GraphicCard #(
                 if(FrameBufferAddr >= 120_000)
                     begin
                         State <= STATE_UART_OUTPUT;
+                        UartOutputData <= UART_OK_CODE;
                         FrameBufferAddr <= 0;
                         FrameBufferWrite <= 0;
                     end
@@ -387,13 +498,14 @@ module GraphicCard #(
                 //FrameBufferAddr <= FrameBufferAddr + 1;
                 if(UartOutputReady)
                     begin
-                        UartOutputData <= 42;
+                        UartOutputData <= UART_OK_CODE;
                         UartOutputEnable <= 1;
                         UartResetCounter <= 0;
                         FrameBufferAddr <= FrameBufferAddr + 1;
                         if(FrameBufferAddr >= 120_000)
                             begin
                                 State <= STATE_UART_OUTPUT;
+                                UartOutputData <= UART_OK_CODE;
                                 UartInputBufferPointer <= 0;
                                 FrameBufferWrite <= 0;
                             end
@@ -449,7 +561,6 @@ module GraphicCard #(
             begin
                 if(UartOutputReady)
                     begin
-                        UartOutputData <= 42;
                         UartOutputEnable <= 1;
                         State <= STATE_IDLE;
                     end
@@ -471,11 +582,19 @@ module GraphicCard #(
          else if(State == STATE_EXECUTE)
             begin
                 State <= STATE_UART_OUTPUT;
+                UartOutputData <= UART_OK_CODE;
                 casez(InstructionInput[23:20])
                     INSTRUCTION_ECHO:
                         begin
                             State <= STATE_UART_OUTPUT;
                             CounterValue <= InstructionInput[19:0];
+                        end
+                    INSTRUCTION_GET:
+                        begin
+                            State <= STATE_READ;
+                            FrameBufferWrite <= 0;
+                            FrameBufferAddr <= InstructionInput[16:0];
+                            FrameBufferInput <= 0;
                         end
                     INSTRUCTION_PUT:
                         begin
@@ -498,9 +617,10 @@ module GraphicCard #(
                             State <= STATE_EXECUTE_CLEAR;
                             FrameBufferAddr <= 0;
                         end
-                    INSTRUCTION_LOAD:
+                    INSTRUCTION_STORE:
                         begin
                             State <= STATE_WAIT_UART_OUTPUT;
+                            UartOutputData <= UART_OK_CODE;
                             //CounterValue <= InstructionInput[16:0];
                             if(InstructionInput[19:17] == 3'b000)
                                 begin
@@ -531,6 +651,45 @@ module GraphicCard #(
                                     RegisterF <= InstructionInput[16:0];
                                 end
                         end
+                    INSTRUCTION_COPY:
+                        begin
+                            State <= STATE_EXECUTE_COPY;
+                            CX1 <= RegisterA;
+                            CY1 <= RegisterB;
+                            CX2 <= RegisterA + RegisterE;
+                            CY2 <= RegisterB + RegisterF;
+                            CX3 <= RegisterC;
+                            CY3 <= RegisterD;
+                            CX4 <= RegisterC + RegisterE;
+                            CY4 <= RegisterC + RegisterF;
+                            
+                            if(RegisterD >= RegisterB)
+                                begin
+                                    CopyForwardMode <= 0;
+                                    PX1 <= RegisterA + RegisterE; 
+                                    PY1 <= RegisterB + RegisterF;
+                                    PX2 <= RegisterC + RegisterE;
+                                    PY2 <= RegisterD + RegisterF;
+                                end
+                            else
+                                begin
+                                    CopyForwardMode <= 1;
+                                    PX1 <= RegisterA; 
+                                    PY1 <= RegisterB;
+                                    PX2 <= RegisterC;
+                                    PY2 <= RegisterD;
+                                end
+                        end
+                    /*INSTRUCTION_BLIT:  //TODO: Add instr
+                        begin
+                            State <= STATE_EXECUTE_BLIT;
+                            CX1 <= RegisterA;
+                            CY1 <= RegisterB;
+                            CX2 <= RegisterC;
+                            CY2 <= RegisterD;
+                            CW <= RegisterE; 
+                            CH <= RegisterF;
+                        end*/
                     INSTRUCTION_FILL:
                         begin
                             State <= STATE_EXECUTE_FILL;

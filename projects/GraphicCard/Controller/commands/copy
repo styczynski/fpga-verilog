@@ -1,0 +1,11 @@
+#!/bin/node
+
+const client = require('../client.js');
+client.call('copy', {
+    x1: parseInt(process.argv[2]),
+    y1: parseInt(process.argv[3]),
+    x2: parseInt(process.argv[4]),
+    y2: parseInt(process.argv[5]),
+    w: parseInt(process.argv[6]),
+    h: parseInt(process.argv[7])
+});

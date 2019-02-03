@@ -6,7 +6,11 @@ const callRemote = (commandName, args) => {
       method: 'GET'
     };
     
-    if(commandName === 'rect') {
+    if(commandName === 'get') {
+        options.uri = `${options.uri}/get/${args.x}/${args.y}`;
+    } else if(commandName === 'copy') {
+        options.uri = `${options.uri}/copy/${args.x1}/${args.y1}/${args.x2}/${args.y2}/${args.w}/${args.h}`;
+    } else if(commandName === 'rect') {
         options.uri = `${options.uri}/rect/${args.color}/${args.x1}/${args.y1}/${args.x2}/${args.y2}`;
     } else if(commandName === 'load') {
         options.uri = `${options.uri}/load/${args.reg}/${args.value}`;

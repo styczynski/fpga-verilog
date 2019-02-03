@@ -9,12 +9,16 @@ localhost:3000/clear
 */
 // Hello
 const path = require('path');
+const sharp = require('sharp');
 const SerialPort = require('serialport');
+const stream = require('stream');
 const express = require('express');
+const fileUpload = require('express-fileupload');
 const bodyParser = require('body-parser');
 const blessed = require('blessed');
 const contrib = require('blessed-contrib');
 const XTerm   = require('blessed-xterm');
+const PNG = require('pngjs').PNG;
 
 let stackData = [];
 let readData = [];
@@ -26,7 +30,7 @@ let stackFlags = 0;
 let statScheduledCommandsCnt = 0;
 let statExecutedCommandsCnt = 0;
 
-const port = new SerialPort('COM10', {
+const port = new SerialPort('COM16', {
     baudRate: 230400
 });
 
@@ -183,8 +187,24 @@ const getFlagsDescrObj = (flags) => {
 const paintPixelHelper = (x, y, col) => [ ...numToBytes((1048576*2) + (131072*col) + (400*y+x), 3) ];
 const loadRegHelper = (reg, value) => [ ...numToBytes((1048576*5) + (131072*reg) + (value), 3) ];
 
+let lastRcvValue = null;
 
 const COMMANDS = {
+    copy: ({ port, handler, x1, y1, x2, y2, w, h }) => {
+        sendDataWithRetry(port, loadRegHelper(0, x1), () => {
+            sendDataWithRetry(port, loadRegHelper(1, y1), () => {
+                sendDataWithRetry(port, loadRegHelper(2, x2), () => {
+                    sendDataWithRetry(port, loadRegHelper(3, y2), () => {
+                        sendDataWithRetry(port, loadRegHelper(4, w), () => {
+                            sendDataWithRetry(port, loadRegHelper(5, h), () => {
+                                sendDataWithRetry(port, numToBytes((1048576*7) + (131072*0), 3), handler);
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    },
     echo: ({ port, handler, data }) => {
         const d = [ ...numToBytes((1048576*1) + data, 3) ];
         //logger.log('SEND '+d.join(' '));
@@ -212,16 +232,24 @@ const COMMANDS = {
             });
         });
     },
-    stream: ({ port, handler }) => {
+    stream: ({ port, handler, data }) => {
         sendDataWithRetry(port, [255, 255, 255, ...numToBytes((1048576*3), 3)], () => {
             let commands = [];
-            for(let i=0;i<120000;++i) {
-                const x = parseInt(i%400);
-                const y = parseInt(i/400);
-                const col = (x%2==0 || y%2==0)?(4):(5);//(y == 100+parseInt(Math.sin(x/20)*50))?(3):(1);
-                ([
-                    ...numToBytes((32*col), 1)
-                ]).forEach((i) => commands.push(i));
+            if(!data) {
+                for(let i=0;i<120000;++i) {
+                    const x = parseInt(i%400);
+                    const y = parseInt(i/400);
+                    const col = (x%2==0 || y%2==0)?(4):(5);//(y == 100+parseInt(Math.sin(x/20)*50))?(3):(1);
+                    ([
+                        ...numToBytes((32*col), 1)
+                    ]).forEach((i) => commands.push(i));
+                }
+            } else {
+                data.forEach((col) => {
+                    ([
+                        ...numToBytes((32*col), 1)
+                    ]).forEach((i) => commands.push(i));
+                });
             }
             port.write(commands, handler);
         });
@@ -233,6 +261,23 @@ const COMMANDS = {
         const d = paintPixelHelper(x, y, color);
         logger.log('SEND '+d.join(' '));
         sendDataWithRetry(port, d, handler)
+    },
+    get: ({ port, handler, x, y }) => {
+        readData = [];
+        sendDataWithRetry(port, [ ...numToBytes((1048576*8) + (131072*0) + (400*y+x), 3) ], handler, null, (value) => {
+            sendDataWithRetry(port, [ ...numToBytes((1048576*8) + (131072*0) + (400*y+x), 3) ], handler, null, (value) => {
+                
+                value = parseInt(value);
+                const R = parseInt(value/4)%2;
+                const G = parseInt(value/2)%2;
+                const B = parseInt(value)%2;
+                logger.log('GET = '+value+': R='+R+', G='+G+', B='+B);
+                
+                lastRcvValue = `#${R?'ff':'00'}${G?'ff':'00'}${B?'ff':'00'}`;
+                readData = [];
+                handler();
+            });
+        });
     },
     xpaint: ({ port, handler, x, y }) => {
         let commands = [];
@@ -306,12 +351,16 @@ const app = express();
 
 app.use(express.json());
 app.use(express.static('app'));
+app.use(fileUpload({
+  limits: { fileSize: 50 * 1024 * 1024 },
+}));
 
 let reqSecNewResult = 0;
 let reqSecData = [];
 let stackSecData = [];
 
 const executeCommand = (params, response) => {
+   lastRcvValue = null;
    statScheduledCommandsCnt = 0;
    statExecutedCommandsCnt = 0;
    
@@ -323,7 +372,11 @@ const executeCommand = (params, response) => {
        commands = [ params ];
    }
    sendCommands(port, commands, () => {
-       response.send({status: "OK"});
+       const retObj = { status: 'OK' };
+       if(lastRcvValue !== null) {
+           retObj.value = lastRcvValue;
+       }
+       response.send(retObj);
    });
    logger.log('COMMAND END');
 };
@@ -335,6 +388,64 @@ app.post('/execute', function(req, res) {
    });
 });
 
+app.post('/upload', function(req, res) {
+  console.log(req.files.foo);
+  
+  let response = [];
+  
+  const resizerStream = sharp()
+    .resize(400, 300)
+    .png();
+  
+  // Initiate the source
+  const bufferStream = new stream.PassThrough();
+  bufferStream.end(req.files.foo.data);
+  bufferStream
+    .pipe(resizerStream)
+    .pipe(new PNG({
+      filterType: 4
+    }))
+    .on('parsed', function() {
+        let sumr = 0;
+        let sumg = 0;
+        let sumb = 0;
+        let samplesCount = 0;
+        
+        for(let y=0; y<this.height; y++) {
+            for(let x=0; x<this.width; x++) {
+                let idx = (this.width * y + x) << 2;
+                
+                sumr += this.data[idx]/255;
+                sumg += this.data[idx+1]/255;
+                sumb += this.data[idx+2]/255;
+                ++samplesCount;
+            }
+        }
+        
+        let avgr = sumr/samplesCount*255;
+        let avgg = sumg/samplesCount*255;
+        let avgb = sumb/samplesCount*255;
+        
+        
+        for(let y = 0; y < this.height; y++) {
+            for(let x = 0; x < this.width; x++) {
+                let idx = (this.width * y + x) << 2;
+ 
+                const r = this.data[idx] >= avgr;
+                const g = this.data[idx+1] >= avgg;
+                const b = this.data[idx+2] >= avgb;
+                
+                response.push(r*4+g*2+b);
+            }
+        }
+ 
+        //res.send({ data: response });
+        runTask(() => {
+            executeCommand({ call: 'stream', data: response }, res);
+       });
+    });
+});
+
 app.get('/clear', function(req, res) {
    runTask(() => {
        executeCommand({ call: 'clear' }, res);
@@ -344,6 +455,20 @@ app.get('/clear', function(req, res) {
 app.get('/stream', function(req, res) {
    runTask(() => {
        executeCommand({ call: 'stream' }, res);
+   });
+});
+
+app.get('/copy/:x1/:y1/:x2/:y2/:w/:h', function(req, res) {
+   runTask(() => {
+       executeCommand({
+          call: 'copy',
+          x1: parseInt(req.params.x1),
+          y1: parseInt(req.params.y1),
+          x2: parseInt(req.params.x2),
+          y2: parseInt(req.params.y2),
+          w: parseInt(req.params.w),
+          h: parseInt(req.params.h)
+       }, res);
    });
 });
 
@@ -369,6 +494,16 @@ app.get('/load/:reg/:value', function(req, res) {
 app.get('/echo/:data', function(req, res) {
    runTask(() => {
         executeCommand({ call: 'echo', data: parseInt(req.params.data) }, res);
+   });
+});
+
+app.get('/get/:x/:y', function(req, res) {
+   runTask(() => {
+       executeCommand({
+           call: 'get',
+           x: parseInt(req.params.x),
+           y: parseInt(req.params.y)
+       }, res);
    });
 });
 
