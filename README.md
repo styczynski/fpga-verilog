@@ -1,4 +1,4 @@
-# fpga-verilog [![Build Status](https://travis-ci.org/styczynski/fpga-verilog.svg?branch=master)](https://travis-ci.org/styczynski/fpga-verilog)
+# 🔌🎓 fpga-verilog [![Build Status](https://travis-ci.org/styczynski/fpga-verilog.svg?branch=master)](https://travis-ci.org/styczynski/fpga-verilog) ![Language Stats Badge](https://img.shields.io/github/languages/top/styczynski/fpga-verilog.svg?style=flat) ![License Badge](https://img.shields.io/github/license/styczynski/fpga-verilog.svg?style=flat)
 
 ## About
 
