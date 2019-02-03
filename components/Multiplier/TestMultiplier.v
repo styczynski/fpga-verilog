@@ -53,7 +53,7 @@ module TestClaAdder;
             wait(Ready == 0);
             Start = 0;
             wait(Ready == 1);
-            `assert(Product == 20);
+            `assert(Product, 20);
         
 	`endTest
       

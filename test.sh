@@ -2,7 +2,7 @@
 
 opwd=$PWD
 echo "$opwd"
-for testfile in `find . -name "Test*"`;
+for testfile in `find . -name "Test*.v"`;
 do
   cd "$(dirname $testfile)"
   iverilog -g2012 "$(basename $testfile)"
