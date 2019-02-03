@@ -5,6 +5,7 @@ before_install:
   # Install Bison, Flex, CMAKE
   - sudo apt-get -qq install bison flex wget cmake
   # Install readline
+  - sudo apt-cache search readline
   - sudo apt-get -qq install libreadline6 libreadline6–dev
   # Install gperf
   - sudo apt-get -qq install gperf
