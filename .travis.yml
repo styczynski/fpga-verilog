@@ -2,6 +2,9 @@ dist: trusty
 language: cpp
 before_install:
   - sudo apt-get update -qq
+  # Get QFlow
+  - wget "http://archive.ubuntu.com/ubuntu/pool/universe/q/qflow/qflow-tech-osu035_1.1.23-1_all.deb"
+  - sudo apt install ./qflow-tech-osu035_1.1.23-1_all.deb
   # Install Bison, Flex, CMAKE
   - sudo apt-get -qq install bison flex wget cmake
   # Install readline
