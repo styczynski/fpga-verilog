@@ -30,7 +30,7 @@ module MiniCalc2
     parameter INPUT_BIT_WIDTH = 32
 )
 (
-    input Clk,
+    input wire Clk,
     output reg [0:7] LED,
     output wire [0:6] LEDDisp3,
     output wire [0:6] LEDDisp2,

@@ -4,9 +4,9 @@
 
 module MiniCalc2Impl
 (
-    input Clk,
-    input [3:0] Btn,
-    input [7:0] Switch,
+    input wire Clk,
+    input wire [3:0] Btn,
+    input wire [7:0] Switch,
     output wire [0:7] LED,
     output wire [0:6] IO_LED1,
     output wire [0:6] IO_LED2,

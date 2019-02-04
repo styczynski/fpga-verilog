@@ -203,7 +203,9 @@ module TestMiniCalc
         
         `describe("Check multiplication");
             /* Multiplicate elements */
-            `do_mul; `assertDigitsValue(2200);
+            `do_mul;
+            $display("here = %d %d %d %d", Digit1, Digit2, Digit3, Digit4);
+            `assertDigitsValue(2200);
             /* Now we should have 120*200 = 264000 which is two 2-byte chunks: Bin< 0...0 0100, 0000 0111 0100 0000‬ > = ‭Dec< 4, 1856 >*/
             `do_mul; `assertDigitsValueHi(1856, 4);
             /* Now we got 42*264000 = 11088000 which is two 2-byte chunks: Dec< ‭10101001, 12416 > */

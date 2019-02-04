@@ -21,10 +21,10 @@ module SignDivider
     parameter INPUT_BIT_WIDTH = 8
 )
 (
-    input Clk,
-    input Sign,
-    input [INPUT_BIT_WIDTH-1:0] Dividend,
-    input [INPUT_BIT_WIDTH-1:0] Divider,
+    input wire Clk,
+    input wire Sign,
+    input wire [INPUT_BIT_WIDTH-1:0] Dividend,
+    input wire [INPUT_BIT_WIDTH-1:0] Divider,
     output reg [INPUT_BIT_WIDTH-1:0] Quotient,
     output wire [INPUT_BIT_WIDTH-1:0] Remainder,
     output wire Ready
