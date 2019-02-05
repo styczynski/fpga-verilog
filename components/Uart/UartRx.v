@@ -34,30 +34,19 @@ module UartRx
     ) rx_sampler_clk_div (
         .Reset(RxSamplerReset),
         .Clk(Clk),
-        .ClkOutput(RxSamplerClockEnable)
+        .ClkEnableOutput(RxSamplerClockEnable)
     );
-    
-    /*ClockDiv #(
-        .FREQ_I(CLOCK_FREQUENCY),
-        .FREQ_O(BAUD_RATE * 3),
-        .PHASE(1'b1),
-        .MAX_PPM(50_000)
-    ) rx_sampler_clk_div (
-        .reset(RxSamplerReset),
-        .clk_i(Clk),
-        .clk_o(RxSamplerClockEnable)
-    );*/
 
     reg [2:0] RxSample = 3'b000;
     wire RxSample1 = ( RxSample == 3'b111 || RxSample == 3'b110 || RxSample == 3'b101 || RxSample == 3'b011 );
     
-    always @(posedge RxSamplerClockEnable or negedge RxSamplerReset)
+    always @(posedge Clk or negedge RxSamplerReset)
     begin
         if(!RxSamplerReset)
             begin
                 RxSample <= 3'b000;
             end
-        else
+        else if(RxSamplerClockEnable)
             begin
                 RxSample <= {RxSample[1:0], RxWire};
             end
@@ -67,13 +56,13 @@ module UartRx
     reg [1:0] RxSampleNo = 2'd2;
     wire RxSampleReady = ( RxSampleNo == 2'd2 );
     
-    always @(posedge RxSamplerClockEnable or negedge RxSamplerReset)
+    always @(posedge Clk or negedge RxSamplerReset)
     begin
         if(!RxSamplerReset)
             begin
                 RxSampleNo <= 2'd2;
             end
-        else
+        else if(RxSamplerClockEnable)
             begin
                 case(RxSampleNo)
                     2'd0: RxSampleNo <= 2'd1;

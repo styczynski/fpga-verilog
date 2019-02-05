@@ -40,7 +40,7 @@ module FreqDivider #(
             begin
                 if(Counter >= COUNTER_VALUE)
                     begin
-                        ClkEnableOutput <= 1;
+                        ClkEnableOutput <= ClkOutput;
                         Counter <= 0;
                         ClkOutput <= ~ClkOutput;
                     end

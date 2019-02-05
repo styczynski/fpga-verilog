@@ -35,21 +35,6 @@ module UartTx
         .Clk(Clk),
         .ClkOutput(TxSamplerClockEnable)
     );
-    
-    /*ClockDiv #(
-        .FREQ_I(CLOCK_FREQUENCY),
-        // Make sure TX baud is exactly the same as RX baud, even after all the rounding that
-        // might have happened inside rx_sampler_clk_div, by replicating it here.
-        // Otherwise, anything that sends an octet every time it receives an octet will
-        // eventually catch a frame error.
-        .FREQ_O(CLOCK_FREQUENCY / ((CLOCK_FREQUENCY / (BAUD_RATE * 3) / 2) * 2) / 3),
-        .PHASE(1'b0),
-        .MAX_PPM(50_000)
-    ) tx_sampler_clk_div (
-        .reset(TxSamplerReset),
-        .clk_i(Clk),
-        .clk_o(TxSamplerClockEnable)
-    );*/
 
     // TX strobe generator
     reg [1:0] TxStrobeReg = 2'b00;
