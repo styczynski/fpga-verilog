@@ -1,10 +1,12 @@
 dist: trusty
 language: cpp
 before_install:
+  # Add Yosys repository
+  - sudo add-apt-repository "ppa:saltmakrell/ppa"
+  # Perform update
   - sudo apt-get update -qq
-  # Get QFlow
-  - wget "http://ftp.de.debian.org/debian/pool/main/q/qflow/qflow_1.1.37-1+b1_i386.deb"
-  - sudo apt install ./qflow_1.1.37-1+b1_i386.deb
+  # Install Yosys
+  - sudo apt-get install yosys
   # Install Bison, Flex, CMAKE
   - sudo apt-get -qq install bison flex wget cmake
   # Install readline
@@ -22,3 +24,4 @@ before_install:
   - cd ..
 script:
   - bash ./test.sh
+  - bash ./synth.sh
