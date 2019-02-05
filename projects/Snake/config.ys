@@ -1,0 +1,13 @@
+# read design 
+read_verilog GraphicCardImpl.v
+
+# Synthetise for Xilinx device
+synth_xilinx -top MiniCalc2Impl
+
+tee -o /dev/stdout stat
+
+# Output the code
+write_verilog -noexpr -noattr xilinx.v
+
+# Print statistics
+stat
