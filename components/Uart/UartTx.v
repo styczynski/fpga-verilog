@@ -1,3 +1,9 @@
+`timescale 1ns / 1ps
+`ifndef LIB_STYCZYNSKI_UART_TX
+`define LIB_STYCZYNSKI_UART_TX
+
+`include "../../components/FreqDivider/FreqDivider.v"
+
 module UartTx
 #(
     parameter CLOCK_FREQUENCY  = 1_000_000,
@@ -21,17 +27,16 @@ module UartTx
     reg TxSamplerReset = 1'b0;
     wire TxSamplerClockEnable;
     
-    /*FreqDivider #(
+    FreqDivider #(
         .FREQUENCY_IN(CLOCK_FREQUENCY),
-        .FREQUENCY_OUT(CLOCK_FREQUENCY / ((CLOCK_FREQUENCY / (BAUD_RATE * 3) / 2) * 2) / 3),
-        .INITIAL_CLOCK_PHASE(1'b0)
+        .FREQUENCY_OUT(CLOCK_FREQUENCY / ((CLOCK_FREQUENCY / (BAUD_RATE * 3) / 2) * 2) / 3)
     ) TxSamplerClockEnable_div (
         .Reset(TxSamplerReset),
         .Clk(Clk),
         .ClkOutput(TxSamplerClockEnable)
-    );*/
+    );
     
-    ClockDiv #(
+    /*ClockDiv #(
         .FREQ_I(CLOCK_FREQUENCY),
         // Make sure TX baud is exactly the same as RX baud, even after all the rounding that
         // might have happened inside rx_sampler_clk_div, by replicating it here.
@@ -44,7 +49,7 @@ module UartTx
         .reset(TxSamplerReset),
         .clk_i(Clk),
         .clk_o(TxSamplerClockEnable)
-    );
+    );*/
 
     // TX strobe generator
     reg [1:0] TxStrobeReg = 2'b00;
@@ -119,3 +124,5 @@ module UartTx
     assign TxReady = (TxState == STATE_TX_IDLE);
 
 endmodule
+
+`endif

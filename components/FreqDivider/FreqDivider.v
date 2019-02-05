@@ -10,7 +10,8 @@ module FreqDivider #(
     ) (
         input wire Reset,
         input wire Clk,
-        output reg ClkOutput
+        output reg ClkOutput,
+        output reg ClkEnableOutput
     );
 
     // This calculation always rounds frequency up.
@@ -32,18 +33,20 @@ module FreqDivider #(
         if(!Reset)
             begin
                 Counter <= 0;
+                ClkEnableOutput <= 0;
                 ClkOutput <= 0;
             end
         else
             begin
                 if(Counter >= COUNTER_VALUE)
                     begin
-                        ClkOutput <= 1;
+                        ClkEnableOutput <= 1;
                         Counter <= 0;
+                        ClkOutput <= ~ClkOutput;
                     end
                 else
                     begin
-                        ClkOutput <= 0;
+                        ClkEnableOutput <= 0;
                         Counter <= Counter + 1;
                     end
         end
