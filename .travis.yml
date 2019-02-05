@@ -2,26 +2,10 @@ dist: trusty
 language: cpp
 before_install:
   # Add Yosys repository
-  - sudo add-apt-repository "ppa:saltmakrell/ppa"
+  - sudo add-apt-repository -y "ppa:saltmakrell/ppa"
   # Perform update
   - sudo apt-get update -qq
   # Install Yosys
   - sudo apt-get install yosys
-  # Install Bison, Flex, CMAKE
-  - sudo apt-get -qq install bison flex wget cmake
-  # Install readline
-  - sudo apt-get -qq install lib32readline6 lib32readline6-dev
-  # Install gperf
-  - sudo apt-get -qq install gperf
-  # Install autoconf
-  - sudo apt-get -qq install autoconf
-  # Clone Icarus Verilog GIT repository
-  - git clone https://github.com/steveicarus/iverilog.git
-  # Build the IVerilog from sources
-  - cd iverilog && sh autoconf.sh && ./configure && make
-  # Install the built iverilog
-  - sudo make install
-  - cd ..
 script:
-  - bash ./test.sh
   - bash ./synth.sh
