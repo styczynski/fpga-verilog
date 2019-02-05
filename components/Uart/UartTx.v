@@ -29,8 +29,9 @@ module UartTx
     
     FreqDivider #(
         .FREQUENCY_IN(CLOCK_FREQUENCY),
-        .FREQUENCY_OUT(CLOCK_FREQUENCY / ((CLOCK_FREQUENCY / (BAUD_RATE * 3) / 2) * 2) / 3)
-    ) TxSamplerClockEnable_div (
+        .FREQUENCY_OUT(CLOCK_FREQUENCY / ((CLOCK_FREQUENCY / (BAUD_RATE * 3) / 2) * 2) / 3),
+        .PHASE(1'b0)
+    ) tx_sampler_clk_div (
         .Reset(TxSamplerReset),
         .Clk(Clk),
         .ClkOutput(TxSamplerClockEnable)

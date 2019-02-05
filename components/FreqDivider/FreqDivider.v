@@ -6,12 +6,13 @@
 module FreqDivider #(
         parameter FREQUENCY_IN = 2,
         parameter FREQUENCY_OUT = 1,
-        parameter MAX_PPM = 1_000_000
+        parameter MAX_PPM = 1_000_000,
+        parameter PHASE = 1'b0
     ) (
         input wire Reset,
         input wire Clk,
-        output reg ClkOutput,
-        output reg ClkEnableOutput
+        output reg ClkOutput = PHASE,
+        output reg ClkEnableOutput = PHASE
     );
 
     // This calculation always rounds frequency up.
@@ -26,28 +27,28 @@ module FreqDivider #(
             _ERROR_FREQ_DEVIATION_TOO_HIGH_ error();
     endgenerate
     
-    reg [$clog2(COUNTER_VALUE)+1:0] Counter;
+    reg [$clog2(COUNTER_VALUE)+1:0] Counter = 0;
     
-    always @(posedge Clk)
+    always @(posedge Clk or negedge Reset)
     begin
         if(!Reset)
             begin
                 Counter <= 0;
-                ClkEnableOutput <= 0;
-                ClkOutput <= 0;
+                ClkEnableOutput <= PHASE;
+                ClkOutput <= PHASE;
             end
         else
             begin
-                if(Counter >= COUNTER_VALUE)
+                if(Counter == 0)
                     begin
-                        ClkEnableOutput <= ClkOutput;
-                        Counter <= 0;
+                        Counter <= COUNTER_VALUE;
                         ClkOutput <= ~ClkOutput;
+                        ClkEnableOutput <= ~ClkOutput;
                     end
                 else
                     begin
                         ClkEnableOutput <= 0;
-                        Counter <= Counter + 1;
+                        Counter <= Counter - 1;
                     end
         end
     end

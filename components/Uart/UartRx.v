@@ -30,7 +30,8 @@ module UartRx
     
     FreqDivider #(
         .FREQUENCY_IN(CLOCK_FREQUENCY),
-        .FREQUENCY_OUT(BAUD_RATE * 3)
+        .FREQUENCY_OUT(BAUD_RATE * 3),
+        .PHASE(1'b1)
     ) rx_sampler_clk_div (
         .Reset(RxSamplerReset),
         .Clk(Clk),
